@@ -1,3 +1,5 @@
-mod voxels;
+mod svo;
+mod voxel;
 
-pub use voxels::*;
+pub use svo::*;
+pub use voxel::*;
