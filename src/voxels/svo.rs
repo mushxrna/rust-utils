@@ -107,7 +107,7 @@ impl SparseVoxelOctree {
         }
     }
 
-    fn get_octant(
+    pub fn get_octant(
         x: u32,
         y: u32,
         z: u32,

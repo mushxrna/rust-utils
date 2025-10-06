@@ -10,8 +10,8 @@ pub enum LocalDirection {
 }
 
 pub struct CameraController {
-    position: Vec3<f32>,
-    view_direction: Vec3<f32>,
+    pub position: Vec3<f32>,
+    pub view_direction: Vec3<f32>,
 }
 
 impl CameraController {
@@ -29,7 +29,7 @@ impl CameraController {
     pub fn walk(&mut self, direction: LocalDirection, step_size: f32) {
         let forward = self.view_direction * (step_size, step_size, step_size);
         let up: Vec3<f32> = Vec3::new(0.0, 1.0, 0.0);
-        let right = forward.cross(up).normalize();
+        let right = forward.cross(up).normalize() * (step_size, step_size, step_size);
         let negative: Vec3<f32> = Vec3::new(-1.0, -1.0, -1.0);
 
         match direction {
