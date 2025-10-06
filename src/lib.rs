@@ -1,5 +1,6 @@
 #![allow(unused)]
 
+pub mod camera;
 pub mod vectors;
 pub mod voxels;
 

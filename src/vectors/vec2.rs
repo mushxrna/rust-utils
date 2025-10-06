@@ -19,6 +19,19 @@ impl<T: NumericType> VectorType<T> for Vec2<T> {
     }
 }
 
+impl<T: NumericType> NumericCollectionType<T> for Vec2<T> {
+    fn len(&self) -> Option<usize> {
+        Some(2)
+    }
+    fn get(&self, index: usize) -> Option<T> {
+        match index {
+            0 => Some(self.x),
+            1 => Some(self.y),
+            _ => None,
+        }
+    }
+}
+
 impl<T: NumericType> Vec2<T> {
     pub fn new(x: T, y: T) -> Self {
         Self { x, y }

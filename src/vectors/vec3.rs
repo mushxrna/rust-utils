@@ -21,6 +21,20 @@ impl<T: NumericType> VectorType<T> for Vec3<T> {
     }
 }
 
+impl<T: NumericType> NumericCollectionType<T> for Vec3<T> {
+    fn len(&self) -> Option<usize> {
+        Some(3)
+    }
+    fn get(&self, index: usize) -> Option<T> {
+        match index {
+            0 => Some(self.x),
+            1 => Some(self.y),
+            2 => Some(self.z),
+            _ => None,
+        }
+    }
+}
+
 impl<T: NumericType> Vec3<T> {
     pub fn new(x: T, y: T, z: T) -> Self {
         Self { x, y, z }
@@ -37,6 +51,14 @@ impl<T: NumericType> Vec3<T> {
                 y: collection.get(1).unwrap(),
                 z: collection.get(2).unwrap(),
             })
+        }
+    }
+
+    pub fn cross(&self, other: Vec3<T>) -> Self {
+        Vec3 {
+            x: self.y * other.z - self.z * other.y,
+            y: self.z * other.x - self.x * other.z,
+            z: self.x * other.y - self.y * other.x,
         }
     }
 }

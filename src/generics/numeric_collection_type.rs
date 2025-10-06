@@ -1,4 +1,4 @@
-use crate::NumericType;
+use crate::{NumericType, VectorType, vectors::Vec2};
 
 pub trait NumericCollectionType<T: NumericType> {
     fn len(&self) -> Option<usize>;
@@ -14,6 +14,21 @@ impl<T: NumericType> NumericCollectionType<T> for (T, T) {
         match index {
             0 => Some(self.0),
             1 => Some(self.1),
+            _ => None,
+        }
+    }
+}
+
+impl<T: NumericType> NumericCollectionType<T> for (T, T, T) {
+    fn len(&self) -> Option<usize> {
+        Some(3)
+    }
+
+    fn get(&self, index: usize) -> Option<T> {
+        match index {
+            0 => Some(self.0),
+            1 => Some(self.1),
+            2 => Some(self.2),
             _ => None,
         }
     }
