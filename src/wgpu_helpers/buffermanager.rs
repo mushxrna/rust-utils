@@ -32,18 +32,25 @@ impl BufferManager {
                     contents: bytemuck::cast_slice(&[*uniform_array]),
                 })
             }
-            BufferType::VoxelStorage(voxel_array) => {
-                device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                    label: Some("voxel storage buffer"),
-                    usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
-                    contents: bytemuck::cast_slice(&voxel_array.flattened),
-                })
-            }
             BufferType::SvoStorage(svo) => {
                 device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                     label: Some("svo buffer"),
                     usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
                     contents: bytemuck::cast_slice(&svo),
+                })
+            }
+            BufferType::RayHitInfoStorage(rays) => {
+                device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("hitinfo buffer"),
+                    usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+                    contents: bytemuck::cast_slice(&rays),
+                })
+            }
+            BufferType::GenericStorage(bytes) => {
+                device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("hitinfo buffer"),
+                    usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+                    contents: bytemuck::cast_slice(bytes.as_slice()),
                 })
             }
         };
@@ -66,22 +73,6 @@ impl BufferManager {
                     label: Some("uniform bind group layout"),
                 },
             )),
-            BufferType::VoxelStorage(voxel_array) => Some(device.create_bind_group_layout(
-                &wgpu::BindGroupLayoutDescriptor {
-                    label: Some("Bind Group Layout"),
-                    entries: &[wgpu::BindGroupLayoutEntry {
-                        binding: 0,
-                        visibility: wgpu::ShaderStages::COMPUTE,
-                        ty: wgpu::BindingType::Buffer {
-                            ty: wgpu::BufferBindingType::Storage { read_only: true },
-                            has_dynamic_offset: false,
-                            min_binding_size: None,
-                        },
-                        count: None,
-                    }],
-                },
-            )),
-
             BufferType::SvoStorage(svo) => Some(device.create_bind_group_layout(
                 &wgpu::BindGroupLayoutDescriptor {
                     label: Some("Bind Group Layout"),
@@ -97,11 +88,44 @@ impl BufferManager {
                     }],
                 },
             )),
+            BufferType::RayHitInfoStorage(rays) => Some(device.create_bind_group_layout(
+                &wgpu::BindGroupLayoutDescriptor {
+                    label: Some("Bind Group Layout"),
+                    entries: &[wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::COMPUTE,
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Storage { read_only: false },
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
+                    }],
+                },
+            )),
+            BufferType::GenericStorage(bytes) => Some(device.create_bind_group_layout(
+                &wgpu::BindGroupLayoutDescriptor {
+                    label: Some("Bind Group Layout"),
+                    entries: &[wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::COMPUTE,
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Storage { read_only: false },
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
+                    }],
+                },
+            )),
             _ => None,
         };
 
         let bind_group = match &kind {
-            BufferType::Uniform(_) | BufferType::VoxelStorage(_) | BufferType::SvoStorage(_) => {
+            BufferType::Uniform(_)
+            | BufferType::SvoStorage(_)
+            | BufferType::RayHitInfoStorage(_)
+            | BufferType::GenericStorage(_) => {
                 Some(device.create_bind_group(&wgpu::BindGroupDescriptor {
                     layout: bind_group_layout.as_ref().unwrap(),
                     entries: &[wgpu::BindGroupEntry {

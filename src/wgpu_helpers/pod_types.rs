@@ -51,29 +51,20 @@ impl UniformsArray {
     }
 }
 
-#[derive(Clone)]
-pub struct VoxelArray3d {
-    pub size: usize,
-    pub flattened: Vec<f32>,
+#[repr(C)]
+#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct RayHitInfo {
+    pub position: [f32; 4],
+    pub normal: [f32; 4],
+    pub color: [f32; 4],
 }
 
-impl VoxelArray3d {
-    pub fn new(size: usize) -> Self {
-        let flattened = vec![0.0; size * size * size];
-
-        Self { size, flattened }
-    }
-
-    pub fn index_to_coords(&self, index: usize) -> (usize, usize, usize) {
-        let z = index / (self.size * self.size);
-        let remainder = index % (self.size * self.size);
-        let y = remainder / self.size;
-        let x = remainder % self.size;
-
-        (x, y, z)
-    }
-
-    pub fn coords_to_index(&self, coord: (usize, usize, usize)) -> usize {
-        coord.0 + coord.1 * self.size + coord.2 * self.size * self.size
+impl RayHitInfo {
+    pub fn new_empty() -> Self {
+        Self {
+            position: [0.0; 4],
+            normal: [0.0; 4],
+            color: [0.0; 4],
+        }
     }
 }

@@ -1,4 +1,7 @@
-use crate::vectors::{Vec3, Vec4};
+use crate::{
+    NumericCollectionType,
+    vectors::{Vec3, Vec4},
+};
 
 #[derive(Clone, Copy, PartialEq)]
 pub struct Voxel {
@@ -13,6 +16,17 @@ impl Voxel {
             position,
             color,
             id,
+        }
+    }
+    pub fn new_default<T: NumericCollectionType<i32>>(position: T) -> Self {
+        Self {
+            position: Vec3::new(
+                position.get(0).unwrap(),
+                position.get(1).unwrap(),
+                position.get(1).unwrap(),
+            ),
+            color: Vec4::new(1.0, 0.0, 0.0, 1.0),
+            id: 0,
         }
     }
 }

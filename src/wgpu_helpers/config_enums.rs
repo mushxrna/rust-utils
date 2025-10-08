@@ -10,8 +10,9 @@ pub enum BufferType {
     Vertex(&'static [Vertex]),
     Index(&'static [u16]),
     Uniform(UniformsArray),
-    VoxelStorage(VoxelArray3d),
     SvoStorage(Vec<SerialOctreeNode>),
+    RayHitInfoStorage(Vec<RayHitInfo>),
+    GenericStorage(Vec<u8>),
 }
 
 pub enum PipelineType {

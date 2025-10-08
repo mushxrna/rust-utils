@@ -2,13 +2,13 @@ use crate::voxels::Voxel;
 
 #[derive(Clone)]
 pub struct SparseVoxelOctreeNode {
-    data: Option<Voxel>,
-    children: Option<Box<[SparseVoxelOctreeNode; 8]>>,
+    pub data: Option<Voxel>,
+    pub children: Option<Box<[SparseVoxelOctreeNode; 8]>>,
 }
 
 #[derive(Clone)]
 pub struct SparseVoxelOctree {
-    root: SparseVoxelOctreeNode,
+    pub root: SparseVoxelOctreeNode,
     pub max_depth: u32,
 }
 

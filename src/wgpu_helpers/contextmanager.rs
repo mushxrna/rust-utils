@@ -12,7 +12,7 @@ impl WgpuContextManager {
     pub async fn new(size: Vec2<u32>, window: std::sync::Arc<winit::window::Window>) -> Self {
         let instance = {
             wgpu::Instance::new(&wgpu::InstanceDescriptor {
-                backends: wgpu::Backends::METAL,
+                backends: wgpu::Backends::VULKAN,
                 ..Default::default()
             })
         };
