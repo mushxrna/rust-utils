@@ -1,3 +1,4 @@
+use crate::vectors::*;
 use crate::voxels::SerialOctreeNode;
 use crate::wgpu_helpers::{pod_types::*, texturemanager::*};
 
@@ -13,6 +14,7 @@ pub enum BufferType {
     SvoStorage(Vec<SerialOctreeNode>),
     RayHitInfoStorage(Vec<RayHitInfo>),
     GenericStorage(Vec<u8>),
+    ImageBuffer(Vec2<u32>),
 }
 
 pub enum PipelineType {

@@ -22,7 +22,6 @@ impl PipelineManager {
 
     pub fn do_compute_pass(
         &mut self,
-        texture: &wgpu::TextureView,
         encoder: &mut wgpu::CommandEncoder,
         buffers: &Vec<&BufferManager>,
         render_texture: &TextureManager,
@@ -34,7 +33,7 @@ impl PipelineManager {
 
         compute_pass.set_pipeline(self.get_compute_pipeline().unwrap());
 
-        compute_pass.set_bind_group(0, &render_texture.cs_bg, &[]);
+        compute_pass.set_bind_group(0, &render_texture.bind_group, &[]);
 
         for i in 0..buffers.len() {
             compute_pass.set_bind_group(i as u32 + 1, buffers[i].bind_group.as_ref().unwrap(), &[]);
@@ -76,7 +75,7 @@ impl PipelineManager {
             timestamp_writes: None,
         });
         render_pass.set_pipeline(self.get_render_pipeline().unwrap());
-        render_pass.set_bind_group(0, &render_texture.r_bg, &[]);
+        render_pass.set_bind_group(0, &render_texture.bind_group, &[]);
         render_pass.set_vertex_buffer(0, buffers[0].buffer.slice(..));
         render_pass.set_index_buffer(buffers[1].buffer.slice(..), wgpu::IndexFormat::Uint16);
         render_pass.draw_indexed(0..indices_num, 0, 0..1)
@@ -108,7 +107,7 @@ impl PipelineManager {
                 let render_pipeline_layout =
                     device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                         label: Some("Render Pipeline Layout"),
-                        bind_group_layouts: &[&texture.r_bg_layout],
+                        bind_group_layouts: &[&texture.bind_group_layout],
                         push_constant_ranges: &[],
                     });
 
