@@ -46,6 +46,15 @@ impl BufferManager {
                     contents: bytemuck::cast_slice(&svo),
                 })
             }
+            BufferType::ImageBuffer(size) => {
+                let buffer_size = (4 * size.x * size.y) as wgpu::BufferAddress;
+                device.create_buffer(&wgpu::BufferDescriptor {
+                    label: Some("image buffer"),
+                    size: buffer_size,
+                    usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
+                    mapped_at_creation: false,
+                })
+            }
         };
 
         let bind_group_layout = match &kind {
