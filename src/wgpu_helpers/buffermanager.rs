@@ -1,5 +1,5 @@
 use crate::wgpu_helpers::config_enums::*;
-use wgpu::util::DeviceExt;
+use wgpu::{Buffer, util::DeviceExt};
 
 pub struct BufferManager {
     pub kind: BufferType,
@@ -39,6 +39,13 @@ impl BufferManager {
                     contents: bytemuck::cast_slice(&voxel_array.flattened),
                 })
             }
+            BufferType::SvoStorage(svo) => {
+                device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("svo buffer"),
+                    usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+                    contents: bytemuck::cast_slice(&svo),
+                })
+            }
         };
 
         let bind_group_layout = match &kind {
@@ -74,11 +81,27 @@ impl BufferManager {
                     }],
                 },
             )),
+
+            BufferType::SvoStorage(svo) => Some(device.create_bind_group_layout(
+                &wgpu::BindGroupLayoutDescriptor {
+                    label: Some("Bind Group Layout"),
+                    entries: &[wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::COMPUTE,
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Storage { read_only: true },
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
+                    }],
+                },
+            )),
             _ => None,
         };
 
         let bind_group = match &kind {
-            BufferType::Uniform(_) | BufferType::VoxelStorage(_) => {
+            BufferType::Uniform(_) | BufferType::VoxelStorage(_) | BufferType::SvoStorage(_) => {
                 Some(device.create_bind_group(&wgpu::BindGroupDescriptor {
                     layout: bind_group_layout.as_ref().unwrap(),
                     entries: &[wgpu::BindGroupEntry {

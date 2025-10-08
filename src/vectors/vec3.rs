@@ -1,6 +1,6 @@
 use crate::{NumericCollectionType, NumericType, VectorType};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub struct Vec3<T: NumericType> {
     pub x: T,
     pub y: T,

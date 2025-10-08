@@ -1,3 +1,4 @@
+use crate::voxels::SerialOctreeNode;
 use crate::wgpu_helpers::{pod_types::*, texturemanager::*};
 
 pub enum ShaderSource {
@@ -10,6 +11,7 @@ pub enum BufferType {
     Index(&'static [u16]),
     Uniform(UniformsArray),
     VoxelStorage(VoxelArray3d),
+    SvoStorage(Vec<SerialOctreeNode>),
 }
 
 pub enum PipelineType {
