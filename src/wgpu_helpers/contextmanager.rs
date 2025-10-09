@@ -5,6 +5,7 @@ pub struct WgpuContextManager {
     pub queue: wgpu::Queue,
     pub config: Option<wgpu::SurfaceConfiguration>,
     pub surface: Option<wgpu::Surface<'static>>,
+    pub surface_format: Option<wgpu::TextureFormat>,
     pub configured: bool,
 }
 
@@ -51,19 +52,23 @@ impl WgpuContextManager {
             .await
             .unwrap();
 
+        let mut surface_format = None;
+
         let config = match &surface {
             Some(_surface) => {
                 let surface_caps = surface.as_ref().unwrap().get_capabilities(&adapter);
-                let surface_format = surface_caps
-                    .formats
-                    .iter()
-                    .find(|f| f.is_srgb())
-                    .copied()
-                    .unwrap_or(surface_caps.formats[0]);
+                surface_format = Some(
+                    surface_caps
+                        .formats
+                        .iter()
+                        .find(|f| f.is_srgb())
+                        .copied()
+                        .unwrap_or(surface_caps.formats[0]),
+                );
 
                 let config = wgpu::SurfaceConfiguration {
                     usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-                    format: surface_format,
+                    format: surface_format.unwrap(),
                     width: size.x,
                     height: size.y,
                     present_mode: surface_caps.present_modes[0],
@@ -80,7 +85,8 @@ impl WgpuContextManager {
             device,
             queue,
             config,
-            surface: surface,
+            surface,
+            surface_format,
             configured: false,
         }
     }
