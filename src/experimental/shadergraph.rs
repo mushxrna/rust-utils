@@ -2,12 +2,12 @@ use crate::wgpu_helpers::*;
 use std::rc::Rc;
 use wgpu::ShaderModule;
 
-struct ShaderNode {
-    shader: ShaderModule,
-    input_reads: Option<Vec<Rc<ShaderNode>>>,
-    label: String,
-    texture: TextureManager,
-    pipeline: PipelineManager,
+pub struct ShaderNode {
+    pub shader: ShaderModule,
+    pub input_reads: Option<Vec<Rc<ShaderNode>>>,
+    pub label: String,
+    pub texture: TextureManager,
+    pub pipeline: PipelineManager,
 }
 
 impl ShaderNode {
