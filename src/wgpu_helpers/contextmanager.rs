@@ -16,7 +16,7 @@ impl WgpuContextManager {
     ) -> Self {
         let instance = {
             wgpu::Instance::new(&wgpu::InstanceDescriptor {
-                backends: wgpu::Backends::VULKAN,
+                backends: wgpu::Backends::PRIMARY,
                 ..Default::default()
             })
         };
