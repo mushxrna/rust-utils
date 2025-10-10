@@ -18,8 +18,9 @@ impl ShaderNode {
         texture: TextureManager,
         inputs: Option<Vec<Rc<ShaderNode>>>,
     ) -> Self {
+        // Use the bind group layout from the texture which is already configured based on access mode
         let pipeline = PipelineManager::new(
-            PipelineType::Compute(shader.clone(), vec![texture.write_only(&context.device).0]),
+            PipelineType::Compute(shader.clone(), vec![texture.bind_group_layout.clone()]),
             &context.device,
         );
 
@@ -44,6 +45,7 @@ impl ShaderNode {
                 label: Some(&self.label),
             });
 
+        // Use the bind group directly from the texture - it's already configured correctly
         self.pipeline
             .do_compute_pass(&mut encoder, &vec![], &self.texture);
 
