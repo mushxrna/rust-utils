@@ -7,7 +7,6 @@ use crate::wgpu_helpers::{
 use crate::vectors::*;
 
 pub struct PipelineManager {
-    kind: PipelineType,
     pipeline: wgpu::ComputePipeline,
     bind_groups: Vec<wgpu::BindGroup>,
     bind_group_layouts: Vec<BindGroupLayout>,
@@ -34,7 +33,6 @@ impl PipelineManager {
     }
 
     pub fn new(
-        kind: PipelineType,
         shader: wgpu::ShaderModule,
         bind_groups: Vec<BindGroup>,
         bind_group_layouts: Vec<BindGroupLayout>,
@@ -59,7 +57,6 @@ impl PipelineManager {
             });
 
         Self {
-            kind,
             pipeline,
             bind_groups,
             bind_group_layouts,

@@ -31,12 +31,3 @@ pub enum BufferType {
     Storage(Vec<u8>, AccessMode),
     ImageBuffer(Vec2<u32>),
 }
-
-pub enum PipelineType {
-    Render(
-        wgpu::ShaderModule,
-        TextureManager,
-        wgpu::SurfaceConfiguration,
-    ),
-    Compute(wgpu::ShaderModule, Vec<wgpu::BindGroupLayout>),
-}
