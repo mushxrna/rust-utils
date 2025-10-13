@@ -4,62 +4,22 @@ use wgpu::{TexelCopyBufferInfo, wgt::CommandEncoderDescriptor};
 
 use crate::{
     vectors::Vec2,
-    wgpu_helpers::{BufferManager, BufferType, WgpuContextManager},
+    wgpu_helpers::{BufferManager, BufferType, WgpuContextManager, config_enums::*},
 };
-
-#[derive(Clone, Copy, Debug)]
-pub enum TextureAccessMode {
-    ReadOnly,
-    WriteOnly,
-    ReadWrite,
-}
 
 #[derive(Clone)]
 pub struct TextureManager {
-    pub bind_group_layout: wgpu::BindGroupLayout,
-    pub bind_group: wgpu::BindGroup,
-    pub texture_view: wgpu::TextureView,
-    pub texture_sampler: wgpu::Sampler,
+    texture_view: wgpu::TextureView,
+    texture_sampler: wgpu::Sampler,
     pub size: Vec2<u32>,
-    pub texture: wgpu::Texture,
-    pub access_mode: TextureAccessMode,
+    texture: wgpu::Texture,
+    label: String,
 }
 
 impl TextureManager {
-    pub fn write_only(&self, device: &wgpu::Device) -> (wgpu::BindGroupLayout, wgpu::BindGroup) {
-        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::COMPUTE,
-                    ty: wgpu::BindingType::StorageTexture {
-                        access: wgpu::StorageTextureAccess::WriteOnly,
-                        format: wgpu::TextureFormat::Rgba8Unorm,
-                        view_dimension: wgpu::TextureViewDimension::D2,
-                    },
-                    count: None,
-                },
-            ],
-            label: Some("Write-Only Storage Texture Bind Group Layout"),
-        });
-
-        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            layout: &bind_group_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: wgpu::BindingResource::TextureView(&self.texture_view),
-                },
-            ],
-            label: Some("Write-Only Storage Texture Bind Group"),
-        });
-
-        (bind_group_layout, bind_group)
-    }
-
-    pub fn new(size: Vec2<u32>, context: &WgpuContextManager, access_mode: TextureAccessMode) -> Self {
+    pub fn new(size: Vec2<u32>, context: &WgpuContextManager, label: String) -> Self {
         let texture = context.device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Compute Output Texture"),
+            label: Some(label.as_str()),
             size: wgpu::Extent3d {
                 width: size.x,
                 height: size.y,
@@ -86,143 +46,108 @@ impl TextureManager {
             ..Default::default()
         });
 
-        // Create bind group layout based on access mode
-        let (bind_group_layout, bind_group) = match access_mode {
-            TextureAccessMode::WriteOnly => {
-                let layout = context.device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                    entries: &[
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 0,
-                            visibility: wgpu::ShaderStages::COMPUTE,
-                            ty: wgpu::BindingType::StorageTexture {
-                                access: wgpu::StorageTextureAccess::WriteOnly,
-                                format: wgpu::TextureFormat::Rgba8Unorm,
-                                view_dimension: wgpu::TextureViewDimension::D2,
-                            },
-                            count: None,
-                        },
-                    ],
-                    label: Some("Write-Only Storage Texture Bind Group Layout"),
-                });
-
-                let group = context.device.create_bind_group(&wgpu::BindGroupDescriptor {
-                    layout: &layout,
-                    entries: &[
-                        wgpu::BindGroupEntry {
-                            binding: 0,
-                            resource: wgpu::BindingResource::TextureView(&texture_view),
-                        },
-                    ],
-                    label: Some("Write-Only Storage Texture Bind Group"),
-                });
-
-                (layout, group)
-            },
-            TextureAccessMode::ReadOnly => {
-                let layout = context.device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                    entries: &[
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 0,
-                            visibility: wgpu::ShaderStages::FRAGMENT | wgpu::ShaderStages::COMPUTE,
-                            ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                            count: None,
-                        },
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 1,
-                            visibility: wgpu::ShaderStages::FRAGMENT | wgpu::ShaderStages::COMPUTE,
-                            ty: wgpu::BindingType::Texture {
-                                multisampled: false,
-                                view_dimension: wgpu::TextureViewDimension::D2,
-                                sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                            },
-                            count: None,
-                        },
-                    ],
-                    label: Some("Read-Only Texture Bind Group Layout"),
-                });
-
-                let group = context.device.create_bind_group(&wgpu::BindGroupDescriptor {
-                    layout: &layout,
-                    entries: &[
-                        wgpu::BindGroupEntry {
-                            binding: 0,
-                            resource: wgpu::BindingResource::Sampler(&texture_sampler),
-                        },
-                        wgpu::BindGroupEntry {
-                            binding: 1,
-                            resource: wgpu::BindingResource::TextureView(&texture_view),
-                        },
-                    ],
-                    label: Some("Read-Only Texture Bind Group"),
-                });
-
-                (layout, group)
-            },
-            TextureAccessMode::ReadWrite => {
-                let layout = context.device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                    entries: &[
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 0,
-                            visibility: wgpu::ShaderStages::FRAGMENT | wgpu::ShaderStages::COMPUTE,
-                            ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                            count: None,
-                        },
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 1,
-                            visibility: wgpu::ShaderStages::FRAGMENT | wgpu::ShaderStages::COMPUTE,
-                            ty: wgpu::BindingType::Texture {
-                                multisampled: false,
-                                view_dimension: wgpu::TextureViewDimension::D2,
-                                sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                            },
-                            count: None,
-                        },
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 2,
-                            visibility: wgpu::ShaderStages::COMPUTE,
-                            ty: wgpu::BindingType::StorageTexture {
-                                access: wgpu::StorageTextureAccess::WriteOnly,
-                                format: wgpu::TextureFormat::Rgba8Unorm,
-                                view_dimension: wgpu::TextureViewDimension::D2,
-                            },
-                            count: None,
-                        },
-                    ],
-                    label: Some("Read-Write Bind Group Layout"),
-                });
-
-                let group = context.device.create_bind_group(&wgpu::BindGroupDescriptor {
-                    layout: &layout,
-                    entries: &[
-                        wgpu::BindGroupEntry {
-                            binding: 0,
-                            resource: wgpu::BindingResource::Sampler(&texture_sampler),
-                        },
-                        wgpu::BindGroupEntry {
-                            binding: 1,
-                            resource: wgpu::BindingResource::TextureView(&texture_view),
-                        },
-                        wgpu::BindGroupEntry {
-                            binding: 2,
-                            resource: wgpu::BindingResource::TextureView(&texture_view),
-                        },
-                    ],
-                    label: Some("Read-Write Bind Group"),
-                });
-
-                (layout, group)
-            }
-        };
-
         Self {
-            bind_group_layout,
-            bind_group,
+            label,
             texture_view,
             texture_sampler,
             size,
             texture,
-            access_mode,
         }
+    }
+
+    pub fn bindgroup_and_layout(
+        self,
+        access: AccessMode,
+        context: &WgpuContextManager,
+    ) -> (wgpu::BindGroupLayout, wgpu::BindGroup) {
+        let (bind_group_layout, bind_group) = match access {
+            AccessMode::Write => {
+                let layout =
+                    context
+                        .device
+                        .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                            entries: &[wgpu::BindGroupLayoutEntry {
+                                binding: 0,
+                                visibility: wgpu::ShaderStages::COMPUTE,
+                                ty: wgpu::BindingType::StorageTexture {
+                                    access: wgpu::StorageTextureAccess::WriteOnly,
+                                    format: wgpu::TextureFormat::Rgba8Unorm,
+                                    view_dimension: wgpu::TextureViewDimension::D2,
+                                },
+                                count: None,
+                            }],
+                            label: Some("Write-Only Storage Texture Bind Group Layout"),
+                        });
+
+                let group = context
+                    .device
+                    .create_bind_group(&wgpu::BindGroupDescriptor {
+                        layout: &layout,
+                        entries: &[wgpu::BindGroupEntry {
+                            binding: 0,
+                            resource: wgpu::BindingResource::TextureView(&self.texture_view),
+                        }],
+                        label: Some("Write-Only Storage Texture Bind Group"),
+                    });
+
+                (layout, group)
+            }
+            AccessMode::Read => {
+                let layout =
+                    context
+                        .device
+                        .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                            entries: &[
+                                wgpu::BindGroupLayoutEntry {
+                                    binding: 0,
+                                    visibility: wgpu::ShaderStages::FRAGMENT
+                                        | wgpu::ShaderStages::COMPUTE,
+                                    ty: wgpu::BindingType::Sampler(
+                                        wgpu::SamplerBindingType::Filtering,
+                                    ),
+                                    count: None,
+                                },
+                                wgpu::BindGroupLayoutEntry {
+                                    binding: 1,
+                                    visibility: wgpu::ShaderStages::FRAGMENT
+                                        | wgpu::ShaderStages::COMPUTE,
+                                    ty: wgpu::BindingType::Texture {
+                                        multisampled: false,
+                                        view_dimension: wgpu::TextureViewDimension::D2,
+                                        sample_type: wgpu::TextureSampleType::Float {
+                                            filterable: true,
+                                        },
+                                    },
+                                    count: None,
+                                },
+                            ],
+                            label: Some("Read-Only Texture Bind Group Layout"),
+                        });
+
+                let group = context
+                    .device
+                    .create_bind_group(&wgpu::BindGroupDescriptor {
+                        layout: &layout,
+                        entries: &[
+                            wgpu::BindGroupEntry {
+                                binding: 0,
+                                resource: wgpu::BindingResource::Sampler(&self.texture_sampler),
+                            },
+                            wgpu::BindGroupEntry {
+                                binding: 1,
+                                resource: wgpu::BindingResource::TextureView(&self.texture_view),
+                            },
+                        ],
+                        label: Some("Read-Only Texture Bind Group"),
+                    });
+
+                (layout, group)
+            }
+            AccessMode::ReadWrite => {
+                panic!("Read-Write not implemented for textures.")
+            }
+        };
+        (bind_group_layout, bind_group)
     }
 
     pub async fn save_to_image(
@@ -230,7 +155,11 @@ impl TextureManager {
         filepath: &str,
         context: &WgpuContextManager,
     ) -> Result<(), wgpu::PollError> {
-        let temp_buffer = BufferManager::new(BufferType::ImageBuffer(self.size), &context.device);
+        let temp_buffer = BufferManager::new(
+            BufferType::ImageBuffer(self.size),
+            &context.device,
+            String::from("temp buffer belonging to: ".to_owned() + &self.label),
+        );
         let mut encoder = context
             .device
             .create_command_encoder(&CommandEncoderDescriptor {
@@ -275,7 +204,7 @@ impl TextureManager {
             use image::{ImageBuffer, Rgba};
             let buffer =
                 ImageBuffer::<Rgba<u8>, _>::from_raw(self.size.x, self.size.y, data).unwrap();
-            buffer.save("image.png").unwrap();
+            buffer.save(filepath).unwrap();
         }
         temp_buffer.buffer.unmap();
         Ok(())

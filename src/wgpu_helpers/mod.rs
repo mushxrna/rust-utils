@@ -11,4 +11,4 @@ pub use config_enums::*;
 pub use contextmanager::WgpuContextManager;
 pub use pipelinemanager::PipelineManager;
 pub use pod_types::*;
-pub use texturemanager::{TextureManager, TextureAccessMode};
+pub use texturemanager::TextureManager;

@@ -1,5 +1,5 @@
 use crate::{
-    NumericCollectionType, NumericType,
+    generics::{NumericCollectionType, NumericType},
     vectors::{Vec2, Vec3, Vec4},
 };
 

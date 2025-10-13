@@ -1,4 +1,7 @@
-use crate::{NumericType, VectorType, vectors::Vec2};
+use crate::{
+    generics::{NumericType, VectorType},
+    vectors::Vec2,
+};
 
 pub trait NumericCollectionType<T: NumericType> {
     fn len(&self) -> Option<usize>;

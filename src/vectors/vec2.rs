@@ -1,4 +1,4 @@
-use crate::{NumericCollectionType, NumericType, VectorType};
+use crate::generics::{NumericCollectionType, NumericType, VectorType};
 
 #[derive(Clone, Copy)]
 pub struct Vec2<T: NumericType> {

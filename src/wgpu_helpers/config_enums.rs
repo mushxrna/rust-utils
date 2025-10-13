@@ -1,19 +1,34 @@
 use crate::vectors::*;
-use crate::voxels::SerialOctreeNode;
 use crate::wgpu_helpers::{pod_types::*, texturemanager::*};
+
+#[derive(Clone, Copy, Debug)]
+pub enum AccessMode {
+    Read,
+    Write,
+    ReadWrite,
+}
+
+impl AccessMode {
+    pub fn into_buffer_mode(self) -> bool {
+        match self {
+            AccessMode::Read => true,
+            AccessMode::Write => false,
+            AccessMode::ReadWrite => false,
+        }
+    }
+}
 
 pub enum ShaderSource {
     Compute(&'static str),
-    Render(&'static str),
+    Fragment(&'static str),
+    Vertex(&'static str),
 }
 
 pub enum BufferType {
     Vertex(&'static [Vertex]),
     Index(&'static [u16]),
     Uniform(UniformsArray),
-    SvoStorage(Vec<SerialOctreeNode>),
-    RayHitInfoStorage(Vec<RayHitInfo>),
-    GenericStorage(Vec<u8>),
+    Storage(Vec<u8>, AccessMode),
     ImageBuffer(Vec2<u32>),
 }
 
@@ -24,9 +39,4 @@ pub enum PipelineType {
         wgpu::SurfaceConfiguration,
     ),
     Compute(wgpu::ShaderModule, Vec<wgpu::BindGroupLayout>),
-}
-
-pub enum Pipeline {
-    Render(wgpu::RenderPipeline),
-    Compute(wgpu::ComputePipeline),
 }
