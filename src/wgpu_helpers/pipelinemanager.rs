@@ -28,7 +28,7 @@ impl PipelineManager {
             compute_pass.set_pipeline(&self.pipeline);
 
             for i in 0..self.bind_groups.len() {
-                compute_pass.set_bind_group(i as u32 + 1, &self.bind_groups[i], &[]);
+                compute_pass.set_bind_group(i as u32, &self.bind_groups[i], &[]);
             }
 
             let workgroup_size = 16;
