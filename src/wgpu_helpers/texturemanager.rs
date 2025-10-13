@@ -56,7 +56,7 @@ impl TextureManager {
     }
 
     pub fn bindgroup_and_layout(
-        self,
+        &self,
         access: AccessMode,
         context: &WgpuContextManager,
     ) -> (wgpu::BindGroupLayout, wgpu::BindGroup) {
