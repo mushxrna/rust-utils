@@ -13,23 +13,31 @@ pub struct PipelineManager {
 }
 
 impl PipelineManager {
-    pub fn do_compute_pass(&mut self, encoder: &mut wgpu::CommandEncoder, size: Vec2<u32>) {
-        let mut compute_pass = (*encoder).begin_compute_pass(&wgpu::ComputePassDescriptor {
-            label: Some("compute pass"),
-            timestamp_writes: None,
-        });
+    pub fn do_compute_pass(&mut self, context: &WgpuContextManager, size: Vec2<u32>) {
+        let mut encoder = context
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("TODO."),
+            });
+        {
+            let mut compute_pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
+                label: Some("compute pass"),
+                timestamp_writes: None,
+            });
 
-        compute_pass.set_pipeline(&self.pipeline);
+            compute_pass.set_pipeline(&self.pipeline);
 
-        for i in 0..self.bind_groups.len() {
-            compute_pass.set_bind_group(i as u32 + 1, &self.bind_groups[i], &[]);
+            for i in 0..self.bind_groups.len() {
+                compute_pass.set_bind_group(i as u32 + 1, &self.bind_groups[i], &[]);
+            }
+
+            let workgroup_size = 16;
+            let dispatch_x = (size.x + workgroup_size - 1) / workgroup_size;
+            let dispatch_y = (size.y + workgroup_size - 1) / workgroup_size;
+
+            compute_pass.dispatch_workgroups(dispatch_x, dispatch_y, 1);
         }
-
-        let workgroup_size = 16;
-        let dispatch_x = (size.x + workgroup_size - 1) / workgroup_size;
-        let dispatch_y = (size.y + workgroup_size - 1) / workgroup_size;
-
-        compute_pass.dispatch_workgroups(dispatch_x, dispatch_y, 1);
+        context.queue.submit(std::iter::once(encoder.finish()));
     }
 
     pub fn new(
