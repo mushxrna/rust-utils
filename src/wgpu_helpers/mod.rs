@@ -1,4 +1,5 @@
 mod config_enums;
+mod errors;
 mod pod_types;
 
 mod buffermanager;

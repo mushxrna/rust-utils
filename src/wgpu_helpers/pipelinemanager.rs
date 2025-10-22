@@ -1,31 +1,44 @@
+use crate::{
+    vectors::*,
+    wgpu_helpers::{errors::PipelineError, *},
+};
 use wgpu::{BindGroup, BindGroupLayout};
 
-use crate::wgpu_helpers::{
-    BufferManager, TextureManager, WgpuContextManager, config_enums::*, pod_types::*,
-};
-
-use crate::vectors::*;
-
 pub struct PipelineManager {
-    pipeline: wgpu::ComputePipeline,
+    pipeline: ActivePipeline,
     bind_groups: Vec<wgpu::BindGroup>,
     bind_group_layouts: Vec<BindGroupLayout>,
 }
 
 impl PipelineManager {
-    pub fn do_compute_pass(&mut self, context: &WgpuContextManager, size: Vec2<u32>) {
+    pub fn do_compute_pass(
+        &mut self,
+        context: &WgpuContextManager,
+        size: Vec2<u32>,
+    ) -> Result<(), PipelineError> {
         let mut encoder = context
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("TODO."),
             });
+
         {
             let mut compute_pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
                 label: Some("compute pass"),
                 timestamp_writes: None,
             });
 
-            compute_pass.set_pipeline(&self.pipeline);
+            match self.pipeline.clone() {
+                ActivePipeline::Compute(pipe) => compute_pass.set_pipeline(&pipe),
+                _ => {
+                    return Err(PipelineError::PassError(
+                        PipelineError::Specific(String::from(
+                            "Compute pass attempted on Render Pipeline.",
+                        ))
+                        .into(),
+                    ));
+                }
+            }
 
             for i in 0..self.bind_groups.len() {
                 compute_pass.set_bind_group(i as u32, &self.bind_groups[i], &[]);
@@ -38,7 +51,10 @@ impl PipelineManager {
             compute_pass.dispatch_workgroups(dispatch_x, dispatch_y, 1);
         }
         context.queue.submit(std::iter::once(encoder.finish()));
+        Ok(())
     }
+
+    fn do_render_pass(&mut self, context: &WgpuContextManager, size: Vec2<u32>) {}
 
     pub fn new(
         shader: wgpu::ShaderModule,

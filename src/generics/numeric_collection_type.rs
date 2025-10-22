@@ -84,7 +84,7 @@ impl<T: NumericType> NumericCollectionType<T> for [T; 3] {
 
 impl<T: NumericType> NumericCollectionType<T> for [T; 4] {
     fn len(&self) -> Option<usize> {
-        Some(2)
+        Some(4)
     }
 
     fn get(&self, index: usize) -> Option<T> {
