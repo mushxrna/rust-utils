@@ -81,7 +81,7 @@ impl PipelineManager {
             });
 
         Self {
-            pipeline,
+            pipeline: ActivePipeline::Compute(pipeline),
             bind_groups,
             bind_group_layouts,
         }
