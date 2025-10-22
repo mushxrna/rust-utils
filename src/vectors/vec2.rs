@@ -1,5 +1,6 @@
 use crate::generics::{NumericCollectionType, NumericType, VectorType};
 
+#[repr(C)]
 #[derive(Clone, Copy)]
 pub struct Vec2<T: NumericType> {
     pub x: T,
