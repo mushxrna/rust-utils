@@ -1,4 +1,5 @@
 use crate::generics::{NumericCollectionType, NumericType, VectorType};
+use crate::wgpu_helpers::Vertex;
 
 #[derive(Clone, Copy, PartialEq)]
 pub struct Vec3<T: NumericType> {
@@ -60,5 +61,9 @@ impl<T: NumericType> Vec3<T> {
             y: self.z * other.x - self.x * other.z,
             z: self.x * other.y - self.y * other.x,
         }
+    }
+
+    pub fn into_pod_vertex(self) -> Vertex {
+        Vertex::new(Vec3::new(self.x.to_f32(), self.y.to_f32(), self.z.to_f32()))
     }
 }
