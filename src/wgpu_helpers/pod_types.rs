@@ -4,13 +4,13 @@ use crate::wgpu_helpers::config_enums;
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Vertex {
-    pub position: [f32; 3],
+    pub position: [f32; 4],
 }
 
 impl Vertex {
     pub fn new(position: Vec3<f32>) -> Vertex {
         Vertex {
-            position: [position.x, position.y, position.z],
+            position: [position.x, position.y, position.z, 1.0],
         }
     }
 
