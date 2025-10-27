@@ -1,7 +1,7 @@
 pub type Point = crate::vectors::Vec3<f32>;
 
 #[derive(Clone)]
-struct Ray {
+pub struct Ray {
     origin: Point,
     direction: Point,
     intersection: Point,
@@ -26,7 +26,7 @@ impl Ray {
 }
 
 #[derive(Clone, Copy)]
-struct Triangle {
+pub struct Triangle {
     p1: Point,
     p2: Point,
     p3: Point,
