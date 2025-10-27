@@ -5,7 +5,7 @@ use crate::{
         *,
     },
 };
-use wgpu::{BindGroup, BindGroupLayout};
+use wgpu::{BindGroup, BindGroupLayout, CommandBuffer};
 
 pub struct PipelineManager {
     pipeline: ActivePipeline,
@@ -18,7 +18,7 @@ impl PipelineManager {
         &mut self,
         context: &WgpuContextManager,
         size: Vec2<u32>,
-    ) -> Result<(), PipelineError> {
+    ) -> Result<CommandBuffer, PipelineError> {
         let mut encoder = context
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
@@ -53,8 +53,7 @@ impl PipelineManager {
 
             compute_pass.dispatch_workgroups(dispatch_x, dispatch_y, 1);
         }
-        context.queue.submit(std::iter::once(encoder.finish()));
-        Ok(())
+        Ok((encoder.finish()))
     }
 
     fn do_render_pass(&mut self, context: &WgpuContextManager, size: Vec2<u32>) {}
