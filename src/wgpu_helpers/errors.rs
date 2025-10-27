@@ -29,3 +29,20 @@ impl Display for PipelineError {
 }
 
 impl std::error::Error for PipelineError {}
+
+#[derive(Debug)]
+pub enum ProcessError {
+    NotImplemented(),
+}
+
+impl Display for ProcessError {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        match self {
+            ProcessError::NotImplemented() => {
+                write!(f, "Attempted to use a feature that is not yet implemented.")
+            }
+        }
+    }
+}
+
+impl std::error::Error for ProcessError {}

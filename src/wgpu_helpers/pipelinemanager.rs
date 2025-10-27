@@ -1,6 +1,9 @@
 use crate::{
     vectors::*,
-    wgpu_helpers::{errors::PipelineError, *},
+    wgpu_helpers::{
+        errors::{PipelineError, ProcessError},
+        *,
+    },
 };
 use wgpu::{BindGroup, BindGroupLayout};
 
@@ -57,11 +60,11 @@ impl PipelineManager {
     fn do_render_pass(&mut self, context: &WgpuContextManager, size: Vec2<u32>) {}
 
     pub fn new(
-        shader: wgpu::ShaderModule,
+        shader: ShaderSource,
         bind_groups: Vec<BindGroup>,
         bind_group_layouts: Vec<BindGroupLayout>,
         context: &WgpuContextManager,
-    ) -> Self {
+    ) -> Result<Self, ProcessError> {
         let layout_refs: Vec<&wgpu::BindGroupLayout> = bind_group_layouts.iter().collect();
         let pipeline = context
             .device
@@ -74,16 +77,16 @@ impl PipelineManager {
                         push_constant_ranges: &[],
                     },
                 )),
-                module: &shader,
+                module: &shader.into_module(&context)?,
                 entry_point: Some("cs_main"),
                 compilation_options: Default::default(),
                 cache: Default::default(),
             });
 
-        Self {
+        Ok(Self {
             pipeline: ActivePipeline::Compute(pipeline),
             bind_groups,
             bind_group_layouts,
-        }
+        })
     }
 }

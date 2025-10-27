@@ -1,5 +1,10 @@
 use crate::vectors::*;
-use crate::wgpu_helpers::{errors::*, pod_types::*, texturemanager::*};
+use crate::wgpu_helpers::{WgpuContextManager, contextmanager};
+use crate::wgpu_helpers::{
+    errors::{self, *},
+    pod_types::*,
+    texturemanager::*,
+};
 
 trait PipelineType {}
 impl PipelineType for wgpu::ComputePipeline {}
@@ -44,9 +49,31 @@ impl ActivePipeline {
 }
 
 pub enum ShaderSource {
-    Compute(&'static str),
-    Fragment(&'static str),
-    Vertex(&'static str),
+    Compute(&'static str, String),
+    Fragment(&'static str, String),
+    Vertex(&'static str, String),
+}
+
+impl ShaderSource {
+    pub fn into_module(
+        self,
+        context: &WgpuContextManager,
+    ) -> Result<wgpu::ShaderModule, errors::ProcessError> {
+        let shader = match &self {
+            ShaderSource::Compute(src, _) => Ok(src),
+            _ => Err(ProcessError::NotImplemented()),
+        };
+
+        let descriptor = wgpu::ShaderModuleDescriptor {
+            label: match &self {
+                ShaderSource::Compute(_, label) => Some(label),
+                _ => None,
+            },
+            source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::from(*shader?)),
+        };
+
+        Ok(context.device.create_shader_module(descriptor))
+    }
 }
 
 pub enum BufferType {
