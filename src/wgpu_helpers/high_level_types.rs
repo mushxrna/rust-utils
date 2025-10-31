@@ -1,4 +1,7 @@
+use crate::generics::Byteable;
+
 pub type Point = crate::vectors::Vec3<f32>;
+pub type Size = crate::vectors::Vec2<u32>;
 
 #[derive(Clone)]
 pub struct Ray {
@@ -16,12 +19,13 @@ impl Ray {
         }
     }
 
-    pub fn to_pod_data(self) -> Vec<crate::wgpu_helpers::pod_types::Vertex> {
+    pub fn to_raw_bytes(self) -> Vec<u8> {
         vec![
-            self.origin.into_pod_vertex(),
-            self.direction.into_pod_vertex(),
-            self.intersection.into_pod_vertex(),
+            self.origin.to_raw_bytes(),
+            self.direction.to_raw_bytes(),
+            self.intersection.to_raw_bytes(),
         ]
+        .concat()
     }
 }
 
@@ -43,11 +47,12 @@ impl Triangle {
         }
     }
 
-    pub fn to_pod_vertices(self) -> Vec<crate::wgpu_helpers::pod_types::Vertex> {
+    pub fn to_raw_bytes(self) -> Vec<u8> {
         vec![
-            self.p1.into_pod_vertex(),
-            self.p2.into_pod_vertex(),
-            self.p3.into_pod_vertex(),
+            self.p1.to_raw_bytes(),
+            self.p2.to_raw_bytes(),
+            self.p3.to_raw_bytes(),
         ]
+        .concat()
     }
 }

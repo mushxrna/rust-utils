@@ -62,8 +62,4 @@ impl<T: NumericType> Vec3<T> {
             z: self.x * other.y - self.y * other.x,
         }
     }
-
-    pub fn into_pod_vertex(self) -> Vertex {
-        Vertex::new(Vec3::new(self.x.to_f32(), self.y.to_f32(), self.z.to_f32()))
-    }
 }

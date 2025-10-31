@@ -1,6 +1,12 @@
 use crate::vectors::Vec3;
 use crate::wgpu_helpers::config_enums;
 
+pub trait PodType: Copy + Clone + bytemuck::Pod + bytemuck::Zeroable {
+    fn to_bytes(self) -> Vec<u8> {
+        bytemuck::cast_slice(&[self]).to_vec()
+    }
+}
+
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Vertex {
@@ -27,6 +33,8 @@ impl Vertex {
     }
 }
 
+impl PodType for Vertex {}
+
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct UniformsArray {
@@ -51,6 +59,8 @@ impl UniformsArray {
     }
 }
 
+impl PodType for UniformsArray {}
+
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct RayHitInfo {
@@ -68,3 +78,5 @@ impl RayHitInfo {
         }
     }
 }
+
+impl PodType for RayHitInfo {}
