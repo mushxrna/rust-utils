@@ -8,3 +8,4 @@ pub mod wgpu_helpers;
 
 pub mod extensions;
 pub mod generics;
+pub mod parser;
