@@ -51,4 +51,8 @@ impl StringBuffer {
         self.source.clear();
         chars
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.source.is_empty()
+    }
 }
