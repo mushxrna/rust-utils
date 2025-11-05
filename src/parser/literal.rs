@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub enum Literal {
     Word(String),
     Operator(String),
@@ -18,6 +19,14 @@ impl Literal {
                         .collect::<String>()
                         .as_str()
             }
+        }
+    }
+
+    pub fn as_string(&self) -> String {
+        match self {
+            Literal::Word(string) => string.clone(),
+            Literal::Operator(string) => string.clone(),
+            Literal::Expression(v) => v.iter().map(|x| x.as_string()).collect::<String>(),
         }
     }
 }
