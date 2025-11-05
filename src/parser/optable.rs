@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 pub struct OpTable {
-    table: HashMap<String, Box<dyn Fn()>>,
+    table: HashMap<String, Box<dyn Fn(i32, i32)>>,
 }
 
 impl OpTable {
@@ -11,7 +11,7 @@ impl OpTable {
         }
     }
 
-    pub fn insert(&mut self, s: &str, func: Box<dyn Fn()>) {
+    pub fn insert(&mut self, s: &str, func: Box<dyn Fn(i32, i32)>) {
         self.table.insert(s.to_owned(), func);
     }
 
