@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::parser::Literal;
 
 pub struct OpTable {
-    table: HashMap<String, Box<dyn Fn(i32, i32) -> Literal>>,
+    pub table: HashMap<String, Box<dyn Fn(i32, i32) -> Literal>>,
 }
 
 impl OpTable {
