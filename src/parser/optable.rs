@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::parser::Literal;
 
 pub struct OpTable {
-    pub table: HashMap<String, Box<dyn Fn(Literal, Literal) -> Literal>>,
+    pub table: HashMap<String, Box<dyn Fn(Vec<Literal>) -> Literal>>,
 }
 
 impl OpTable {
@@ -13,7 +13,7 @@ impl OpTable {
         }
     }
 
-    pub fn insert(&mut self, s: &str, func: Box<dyn Fn(Literal, Literal) -> Literal>) {
+    pub fn insert(&mut self, s: &str, func: Box<dyn Fn(Vec<Literal>) -> Literal>) {
         self.table.insert(s.to_owned(), func);
     }
 

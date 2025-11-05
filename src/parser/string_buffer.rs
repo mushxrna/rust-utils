@@ -1,4 +1,4 @@
-use crate::parser::{Literal, OpTable};
+use crate::parser::{Literal, OpTable, literal::Operand};
 
 pub struct StringBuffer {
     source: String,
@@ -63,7 +63,7 @@ impl StringBuffer {
             let string = self.pull_string();
 
             if ops.contains(&string) {
-                Some(Literal::Operator(string))
+                Some(Literal::Operator(Operand::Binary(string)))
             } else {
                 Some(Literal::Word(string))
             }
