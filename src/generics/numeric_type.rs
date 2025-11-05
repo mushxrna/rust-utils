@@ -1,9 +1,16 @@
+use bytemuck::NoUninit;
+
+use crate::generics::Byteable;
+
 pub trait NumericType:
     Sized
     + std::ops::Add<Output = Self>
     + std::ops::Sub<Output = Self>
     + std::ops::Mul<Output = Self>
     + std::ops::Div<Output = Self>
+    + bytemuck::Pod
+    + Byteable
+    + NoUninit
     + Clone
     + Copy
 {

@@ -1,4 +1,5 @@
 use crate::generics::Byteable;
+use crate::generics::VectorType;
 
 pub type Point = crate::vectors::Vec3<f32>;
 pub type Size = crate::vectors::Vec2<u32>;
@@ -21,9 +22,9 @@ impl Ray {
 
     pub fn to_raw_bytes(self) -> Vec<u8> {
         vec![
-            self.origin.to_raw_bytes(),
-            self.direction.to_raw_bytes(),
-            self.intersection.to_raw_bytes(),
+            self.origin.to_collection().to_raw_bytes(),
+            self.direction.to_collection().to_raw_bytes(),
+            self.intersection.to_collection().to_raw_bytes(),
         ]
         .concat()
     }
@@ -49,9 +50,9 @@ impl Triangle {
 
     pub fn to_raw_bytes(self) -> Vec<u8> {
         vec![
-            self.p1.to_raw_bytes(),
-            self.p2.to_raw_bytes(),
-            self.p3.to_raw_bytes(),
+            self.p1.to_collection().to_raw_bytes(),
+            self.p2.to_collection().to_raw_bytes(),
+            self.p3.to_collection().to_raw_bytes(),
         ]
         .concat()
     }
