@@ -1,3 +1,5 @@
+use crate::parser::{Literal, OpTable};
+
 pub struct StringBuffer {
     source: String,
 }
@@ -54,5 +56,19 @@ impl StringBuffer {
 
     pub fn is_empty(&self) -> bool {
         self.source.is_empty()
+    }
+
+    pub fn pull_literal(&mut self, ops: OpTable) -> Option<Literal> {
+        if !self.is_empty() {
+            let string = self.pull_string();
+
+            if ops.contains(&string) {
+                Some(Literal::Operator(string))
+            } else {
+                Some(Literal::Word(string))
+            }
+        } else {
+            None
+        }
     }
 }
