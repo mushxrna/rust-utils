@@ -63,7 +63,7 @@ impl StringBuffer {
             let string = self.pull_string();
 
             if ops.contains(&string) {
-                Some(Literal::Operator(Operand::Binary(string)))
+                Some(Literal::Operator(ops.typetable[&string].clone()))
             } else {
                 Some(Literal::Word(string))
             }
