@@ -58,7 +58,7 @@ impl StringBuffer {
         self.source.is_empty()
     }
 
-    pub fn pull_literal(&mut self, ops: OpTable) -> Option<Literal> {
+    pub fn pull_literal(&mut self, ops: &OpTable) -> Option<Literal> {
         if !self.is_empty() {
             let string = self.pull_string();
 
