@@ -8,12 +8,14 @@ pub enum Literal {
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub enum Operand {
     Binary(String),
+    DropIn(String),
 }
 
 impl Operand {
     pub fn as_string(&self) -> String {
         match self {
             Operand::Binary(op) => op.clone(),
+            Operand::DropIn(op) => op.clone(),
             _ => (String::from("x")),
         }
     }
