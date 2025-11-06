@@ -9,6 +9,7 @@ pub enum Literal {
 pub enum Operand {
     Binary(String),
     DropIn(String),
+    Function(String),
 }
 
 impl Operand {
@@ -16,6 +17,7 @@ impl Operand {
         match self {
             Operand::Binary(op) => op.clone(),
             Operand::DropIn(op) => op.clone(),
+            Operand::Function(op) => op.clone(),
             _ => (String::from("x")),
         }
     }
