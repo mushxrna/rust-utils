@@ -10,4 +10,5 @@ pub use errors::ParseError;
 pub use literal::Literal;
 pub use literal::Operand;
 pub use optable::OpTable;
+pub use parser::{ParseTree, ParseTreeBuilder};
 pub use string_buffer::StringBuffer;
