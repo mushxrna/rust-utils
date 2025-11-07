@@ -1,11 +1,11 @@
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum Literal {
     Word(String),
     Operator(Operand),
     Expression(Vec<Literal>),
 }
 
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub enum Operand {
     Binary(String),
     DropIn(String),
@@ -19,6 +19,17 @@ impl Operand {
             Operand::DropIn(op) => op.clone(),
             Operand::Function(op) => op.clone(),
             _ => (String::from("x")),
+        }
+    }
+}
+
+impl Clone for Operand {
+    fn clone(&self) -> Self {
+        println!("Cloning Operand.");
+        match self {
+            Operand::DropIn(s) => Operand::DropIn(self.as_string()),
+            Operand::Binary(s) => Operand::Binary(self.as_string()),
+            Operand::Function(s) => Operand::Function(self.as_string()),
         }
     }
 }
@@ -45,6 +56,17 @@ impl Literal {
             Literal::Word(string) => string.clone(),
             Literal::Operator(op) => op.clone().as_string(),
             Literal::Expression(v) => v.iter().map(|x| x.as_string()).collect::<String>(),
+        }
+    }
+}
+
+impl Clone for Literal {
+    fn clone(&self) -> Self {
+        println!("Cloning Literal.");
+        match self {
+            Literal::Word(s) => Literal::Word(s.clone()),
+            Literal::Operator(o) => Literal::Operator(o.clone()),
+            Literal::Expression(v) => Literal::Expression(v.clone()),
         }
     }
 }
