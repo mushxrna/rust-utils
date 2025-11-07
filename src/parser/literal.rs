@@ -54,7 +54,7 @@ impl Literal {
         match self {
             Literal::Word(string) => string.clone(),
             Literal::Operator(op) => op.as_string().clone(),
-            Literal::Expression(v) => v.iter().map(|x| x.as_string() + " ").collect(),
+            Literal::Expression(v) => v.iter().map(|x| x.as_string()).collect::<String>(),
         }
     }
 }
