@@ -28,18 +28,18 @@ impl OpTable {
         self.function_table[&op.as_string()](args)
     }
 
-    pub fn insert_binary_op(&mut self, str: &str, func: Box<dyn Fn(&Vec<&Literal>) -> Literal>) {
+    pub fn insert_binary_op(&mut self, str: &str, func: fn(&Vec<&Literal>) -> Literal) {
         let op = Operand::Binary(str.to_owned());
-        self.insert(op, func)
+        self.insert(op, Box::new(func))
     }
 
-    pub fn insert_dropin_op(&mut self, str: &str, func: Box<dyn Fn(&Vec<&Literal>) -> Literal>) {
+    pub fn insert_dropin_op(&mut self, str: &str, func: fn(&Vec<&Literal>) -> Literal) {
         let op = Operand::DropIn(str.to_owned());
-        self.insert(op, func)
+        self.insert(op, Box::new(func))
     }
 
-    pub fn insert_function_op(&mut self, str: &str, func: Box<dyn Fn(&Vec<&Literal>) -> Literal>) {
+    pub fn insert_function_op(&mut self, str: &str, func: fn(&Vec<&Literal>) -> Literal) {
         let op = Operand::Function(str.to_owned());
-        self.insert(op, func)
+        self.insert(op, Box::new(func))
     }
 }
