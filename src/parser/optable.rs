@@ -25,7 +25,7 @@ impl OpTable {
     }
 
     pub fn call_by_operand(&self, op: &Operand, args: &Vec<&Literal>) -> Literal {
-        self.function_table[&op.as_string()](args)
+        self.function_table[op.as_string()](args)
     }
 
     pub fn insert_binary_op(&mut self, str: &str, func: fn(&Vec<&Literal>) -> Literal) {

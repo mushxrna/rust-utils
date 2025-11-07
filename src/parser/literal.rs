@@ -13,12 +13,11 @@ pub enum Operand {
 }
 
 impl Operand {
-    pub fn as_string(&self) -> String {
+    pub fn as_string(&self) -> &String {
         match self {
-            Operand::Binary(op) => op.clone(),
-            Operand::DropIn(op) => op.clone(),
-            Operand::Function(op) => op.clone(),
-            _ => (String::from("x")),
+            Operand::Binary(op) => op,
+            Operand::DropIn(op) => op,
+            Operand::Function(op) => op,
         }
     }
 }
@@ -27,9 +26,9 @@ impl Clone for Operand {
     fn clone(&self) -> Self {
         println!("Cloning Operand.");
         match self {
-            Operand::DropIn(s) => Operand::DropIn(self.as_string()),
-            Operand::Binary(s) => Operand::Binary(self.as_string()),
-            Operand::Function(s) => Operand::Function(self.as_string()),
+            Operand::DropIn(s) => Operand::DropIn(self.as_string().clone()),
+            Operand::Binary(s) => Operand::Binary(self.as_string().clone()),
+            Operand::Function(s) => Operand::Function(self.as_string().clone()),
         }
     }
 }
@@ -54,7 +53,7 @@ impl Literal {
     pub fn as_string(&self) -> String {
         match self {
             Literal::Word(string) => string.clone(),
-            Literal::Operator(op) => op.clone().as_string(),
+            Literal::Operator(op) => op.as_string().clone(),
             Literal::Expression(v) => v.iter().map(|x| x.as_string()).collect::<String>(),
         }
     }
