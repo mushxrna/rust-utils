@@ -142,7 +142,7 @@ impl ParseTreeBuilder {
 }
 
 pub struct ParseTree {
-    expression: Literal,
+    pub expression: Literal,
 }
 
 impl ParseTree {
