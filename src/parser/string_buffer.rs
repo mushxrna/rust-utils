@@ -42,6 +42,10 @@ impl StringBuffer {
         &self.source
     }
 
+    pub fn ref_chars(&self) -> impl Iterator<Item = char> + '_ {
+        self.source.chars()
+    }
+
     pub fn pull_string(&mut self) -> String {
         let string = self.source.clone();
         self.clear();
