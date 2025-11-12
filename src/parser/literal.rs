@@ -11,6 +11,7 @@ pub enum Operand {
     Binary(String),
     DropIn(String),
     Function(String),
+    Assignment(String),
 }
 
 impl Operand {
@@ -19,6 +20,7 @@ impl Operand {
             Operand::Binary(op) => op,
             Operand::DropIn(op) => op,
             Operand::Function(op) => op,
+            Operand::Assignment(op) => op,
         }
     }
 }
@@ -30,6 +32,7 @@ impl Clone for Operand {
             Operand::DropIn(s) => Operand::DropIn(self.as_string().clone()),
             Operand::Binary(s) => Operand::Binary(self.as_string().clone()),
             Operand::Function(s) => Operand::Function(self.as_string().clone()),
+            Operand::Assignment(s) => Operand::Assignment(self.as_string().clone()),
         }
     }
 }
