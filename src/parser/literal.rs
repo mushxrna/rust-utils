@@ -3,6 +3,7 @@ pub enum Literal {
     Word(String),
     Operator(Operand),
     Expression(Vec<Literal>),
+    Specifier(String),
 }
 
 #[derive(Debug, Hash, PartialEq, Eq)]
@@ -37,6 +38,7 @@ impl Literal {
     pub fn detail_string(&self) -> String {
         match self {
             Literal::Word(string) => String::new() + " (WORD: " + &string + " ) ",
+            Literal::Specifier(string) => String::new() + " (WORD: " + &string + " ) ",
             Literal::Operator(op) => String::new() + " (OP: " + &op.as_string() + " ) ",
             Literal::Expression(literals) => {
                 String::new()
@@ -53,6 +55,7 @@ impl Literal {
     pub fn as_string(&self) -> String {
         match self {
             Literal::Word(string) => string.clone(),
+            Literal::Specifier(string) => string.clone(),
             Literal::Operator(op) => op.as_string().clone(),
             Literal::Expression(v) => v.iter().map(|x| x.as_string()).collect::<String>(),
         }
@@ -64,6 +67,7 @@ impl Clone for Literal {
         println!("Cloning Literal.");
         match self {
             Literal::Word(s) => Literal::Word(s.clone()),
+            Literal::Specifier(s) => Literal::Specifier(s.clone()),
             Literal::Operator(o) => Literal::Operator(o.clone()),
             Literal::Expression(v) => Literal::Expression(v.clone()),
         }

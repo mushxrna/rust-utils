@@ -67,77 +67,9 @@ impl ParseTreeBuilder {
         Literal::Expression(literals)
     }
 
-    pub fn reduce_expression(&self, exp: Literal) -> Literal {
-        if let Literal::Expression(v) = exp {
-            let mut evaluated: Vec<Literal> = vec![];
-
-            v.into_iter()
-                .for_each(|f| evaluated.push(self.reduce_expression(f)));
-
-            while evaluated.len() >= 1 {
-                let mut found_operator = false;
-                let mut i = 0;
-
-                while i < evaluated.len() {
-                    if let Literal::Operator(op) = &evaluated[i] {
-                        match op {
-                            Operand::Binary(s) => {
-                                if i > 0 && i < evaluated.len() - 1 {
-                                    let left = &evaluated[i - 1];
-                                    let right = &evaluated[i + 1];
-
-                                    let result = self.ops.call_by_operand(op, &vec![left, right]);
-
-                                    evaluated.splice((i - 1)..=(i + 1), vec![result]);
-                                    found_operator = true;
-                                    break;
-                                }
-                            }
-
-                            Operand::DropIn(s) => {
-                                evaluated[i] = self.ops.call_by_operand(op, &vec![]);
-                                found_operator = true;
-                                break;
-                            }
-
-                            Operand::Function(s) => {
-                                let mut args = vec![];
-                                if let Literal::Expression(v) = &evaluated[i + 1] {
-                                    args = v.iter().collect()
-                                }
-
-                                let result = self.ops.call_by_operand(op, &args);
-
-                                if !args.is_empty() {
-                                    evaluated.splice((i)..=(i + 1), vec![result]);
-                                    found_operator = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    i += 1;
-                }
-
-                if !found_operator {
-                    break;
-                }
-            }
-
-            if evaluated.len() == 1 {
-                evaluated[0].clone()
-            } else {
-                Literal::Expression(evaluated)
-            }
-        } else {
-            exp
-        }
-    }
-
     pub fn build(self) -> ParseTree {
         let exp = self.expressionize_buffer(&self.source);
-        let eexp = self.reduce_expression(exp);
-        ParseTree::new(eexp)
+        ParseTree::new(exp)
     }
 }
 
