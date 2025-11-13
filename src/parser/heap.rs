@@ -1,11 +1,12 @@
 use bytemuck::AnyBitPattern;
+use std::marker::PhantomData;
 
 use crate::generics::Byteable;
-use crate::parser::types::*;
 
-pub struct BytePointer {
+pub struct BytePointer<T: Byteable> {
     index: usize,
-    primitive: PrimitiveType,
+    byte_len: usize,
+    primitive: PhantomData<T>,
 }
 
 pub struct ByteHeap {
@@ -21,12 +22,13 @@ impl ByteHeap {
         }
     }
 
-    pub fn insert<T: Byteable>(&mut self, obj: T, primitive: PrimitiveType) -> BytePointer {
+    pub fn insert<T: Byteable>(&mut self, obj: T) -> BytePointer<T> {
         let bytes = obj.to_raw_bytes();
 
         let ptr = BytePointer {
             index: self.last_occupied_index,
-            primitive,
+            byte_len: bytes.len(),
+            primitive: PhantomData,
         };
 
         bytes
@@ -39,8 +41,8 @@ impl ByteHeap {
         ptr
     }
 
-    pub fn view<T: Byteable + AnyBitPattern>(&self, ptr: BytePointer) -> Vec<T> {
-        let range = &self.heap[ptr.index..ptr.index + ptr.primitive.byte_length()];
+    pub fn view<T: Byteable + AnyBitPattern>(&self, ptr: BytePointer<T>) -> Vec<T> {
+        let range = &self.heap[ptr.index..ptr.index + ptr.byte_len];
         bytemuck::cast_slice(range).to_owned()
     }
 
