@@ -4,6 +4,7 @@ mod literal;
 mod optable;
 mod parser;
 mod string_buffer;
+mod types;
 
 pub use errors::ParseError;
 pub use heap::{ByteHeap, BytePointer};
@@ -12,3 +13,4 @@ pub use literal::Operand;
 pub use optable::OpTable;
 pub use parser::{ParseTree, ParseTreeBuilder};
 pub use string_buffer::StringBuffer;
+pub use types::PrimitiveType;
