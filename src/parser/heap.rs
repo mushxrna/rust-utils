@@ -1,7 +1,7 @@
-use bytemuck::AnyBitPattern;
+use bytemuck::{AnyBitPattern, NoUninit};
 use std::marker::PhantomData;
 
-use crate::generics::Byteable;
+use crate::generics::{Byteable, NumericType};
 
 pub struct BytePointer<T: Byteable> {
     index: usize,
@@ -22,8 +22,12 @@ impl ByteHeap {
         }
     }
 
-    pub fn insert<T: Byteable>(&mut self, obj: T) -> BytePointer<T> {
-        let bytes = obj.to_raw_bytes();
+    pub fn insert<T: Byteable + NoUninit>(&mut self, obj: &[T]) -> BytePointer<T> {
+        let bytes = obj
+            .iter()
+            .map(|e| -> Vec<u8> { bytemuck::cast_slice(&[*e]).to_owned() })
+            .collect::<Vec<Vec<u8>>>()
+            .concat();
 
         let ptr = BytePointer {
             index: self.last_occupied_index,
