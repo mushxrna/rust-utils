@@ -22,7 +22,7 @@ impl ByteHeap {
         }
     }
 
-    pub fn insert<T: Byteable + NoUninit>(&mut self, obj: T) -> BytePointer<T> {
+    pub fn insert<T: Byteable>(&mut self, obj: T) -> BytePointer<T> {
         let bytes = obj.to_raw_bytes();
         /*
         let bytes = obj

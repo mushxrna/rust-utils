@@ -54,3 +54,8 @@ impl<T: NumericType> Byteable for Vec<T> {
         }
     }
 }
+
+pub fn test() {
+    let x = &[1, 2];
+    x.to_raw_bytes();
+}
