@@ -4,19 +4,19 @@ use std::rc::Rc;
 use crate::extensions::string_ext::StringExt;
 use crate::parser::{Literal, OpTable, Operand, StringBuffer};
 
-pub struct ParseTreeBuilder {
+pub struct ParseTreeBuilder<'a> {
     source: StringBuffer,
-    ops: Rc<OpTable>,
+    ops: &'a OpTable,
 }
 
-impl ParseTreeBuilder {
-    pub fn new(filepath: &str, ops: Rc<OpTable>) -> ParseTreeBuilder {
+impl<'a> ParseTreeBuilder<'a> {
+    pub fn new(filepath: &str, ops: &'a OpTable) -> ParseTreeBuilder<'a> {
         let string = std::fs::read_to_string(filepath).unwrap();
         let source = Self::pre_process_string(&string);
         ParseTreeBuilder { source, ops }
     }
 
-    pub fn new_from_str(source: &str, ops: Rc<OpTable>) -> ParseTreeBuilder {
+    pub fn new_from_str(source: &str, ops: &'a OpTable) -> ParseTreeBuilder<'a> {
         let source = Self::pre_process_string(source);
         ParseTreeBuilder { source, ops }
     }
@@ -36,7 +36,7 @@ impl ParseTreeBuilder {
         while index < chars.len() {
             match chars[index] {
                 '(' => {
-                    if let Some(l) = working_buffer.pull_literal(&self.ops) {
+                    if let Some(l) = working_buffer.pull_literal(self.ops) {
                         literals.push(l)
                     }
 
@@ -51,7 +51,7 @@ impl ParseTreeBuilder {
                     index = close;
                 }
                 ' ' => {
-                    if let Some(l) = working_buffer.pull_literal(&self.ops) {
+                    if let Some(l) = working_buffer.pull_literal(self.ops) {
                         literals.push(l)
                     }
                 }
@@ -60,7 +60,7 @@ impl ParseTreeBuilder {
             index = index + 1;
         }
 
-        if let Some(l) = working_buffer.pull_literal(&self.ops) {
+        if let Some(l) = working_buffer.pull_literal(self.ops) {
             literals.push(l)
         }
 
