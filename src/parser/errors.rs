@@ -26,14 +26,15 @@ impl std::error::Error for ParseError {}
 
 #[derive(Debug)]
 pub enum InternalError {
-    CannotReference,
+    CannotReference(String),
 }
 
 impl Display for InternalError {
     fn fmt(&self, f: &mut Formatter) -> Result {
         match self {
-            InternalError::CannotReference => {
-                write!(f, "Cannot retrieve reference.",)
+            InternalError::CannotReference(s) => {
+                let s = "Cannot retrieve reference for ".to_string() + s;
+                write!(f, "{}", s)
             }
         }
     }

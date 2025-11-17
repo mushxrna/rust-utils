@@ -53,8 +53,8 @@ impl Literal {
         match self {
             Literal::Word(string) => Ok(string),
             Literal::Operator(op) => Ok(op.as_string()),
-            Literal::Expression(v) => Err(InternalError::CannotReference),
-            Literal::Pointer(p) => Err(InternalError::CannotReference),
+            Literal::Expression(v) => Err(InternalError::CannotReference("ExprStr".to_string())),
+            Literal::Pointer(p) => Err(InternalError::CannotReference("PtrStr".to_string())),
         }
     }
 }
