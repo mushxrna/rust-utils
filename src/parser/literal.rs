@@ -1,3 +1,5 @@
+use crate::parser::errors::InternalError;
+
 #[derive(Debug)]
 pub enum Literal {
     Word(String),
@@ -61,6 +63,15 @@ impl Literal {
             Literal::Specifier(string) => string.clone(),
             Literal::Operator(op) => op.as_string().clone(),
             Literal::Expression(v) => v.iter().map(|x| x.as_string()).collect::<String>(),
+        }
+    }
+
+    pub fn ref_string(&self) -> Result<&String, InternalError> {
+        match self {
+            Literal::Word(string) => Ok(string),
+            Literal::Specifier(string) => Ok(string),
+            Literal::Operator(op) => Ok(op.as_string()),
+            Literal::Expression(v) => Err(InternalError::CannotReference),
         }
     }
 }

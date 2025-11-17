@@ -23,3 +23,20 @@ impl Display for ParseError {
 }
 
 impl std::error::Error for ParseError {}
+
+#[derive(Debug)]
+pub enum InternalError {
+    CannotReference,
+}
+
+impl Display for InternalError {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        match self {
+            InternalError::CannotReference => {
+                write!(f, "Cannot retrieve reference.",)
+            }
+        }
+    }
+}
+
+impl std::error::Error for InternalError {}
