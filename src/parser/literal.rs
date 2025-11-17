@@ -66,7 +66,11 @@ impl Clone for Literal {
             Literal::Word(s) => Literal::Word(s.clone()),
             Literal::Operator(o) => Literal::Operator(o.clone()),
             Literal::Expression(v) => Literal::Expression(v.clone()),
-            Literal::Pointer(p) => self.clone(),
+            Literal::Pointer(p) => {
+                let x = p.as_raw_ptr();
+                let y: BytePointer<i32> = BytePointer::from_raw_ptr(x);
+                Literal::Pointer(Box::new(y))
+            }
         }
     }
 }
