@@ -1,4 +1,4 @@
-use crate::parser::{Literal, OpTable, literal::Operand};
+use crate::parser::*;
 
 pub struct StringBuffer {
     source: String,
@@ -62,12 +62,15 @@ impl StringBuffer {
         self.source.is_empty()
     }
 
-    pub fn pull_literal(&mut self, ops: &OpTable) -> Option<Literal> {
+    pub fn pull_literal(&mut self, ops: &OpTable, refs: &RefTable) -> Option<Literal> {
         if !self.is_empty() {
             let string = self.pull_string();
+            let s_as_literal = Literal::Word(string.clone());
 
             if ops.contains(&string) {
                 Some(Literal::Operator(ops.operand_table[&string].clone()))
+            } else if refs.contains(&s_as_literal) {
+                Some(refs.retrieve(&s_as_literal).clone())
             } else {
                 Some(Literal::Word(string))
             }

@@ -2,23 +2,28 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use crate::extensions::string_ext::StringExt;
-use crate::parser::{Literal, OpTable, Operand, StringBuffer};
+use crate::parser::{Literal, OpTable, Operand, RefTable, StringBuffer};
 
 pub struct ParseTreeBuilder<'a> {
     source: StringBuffer,
     ops: &'a OpTable,
+    refs: &'a RefTable,
 }
 
 impl<'a> ParseTreeBuilder<'a> {
-    pub fn new(filepath: &str, ops: &'a OpTable) -> ParseTreeBuilder<'a> {
+    pub fn new(filepath: &str, ops: &'a OpTable, refs: &'a RefTable) -> ParseTreeBuilder<'a> {
         let string = std::fs::read_to_string(filepath).unwrap();
         let source = Self::pre_process_string(&string);
-        ParseTreeBuilder { source, ops }
+        ParseTreeBuilder { source, ops, refs }
     }
 
-    pub fn new_from_str(source: &str, ops: &'a OpTable) -> ParseTreeBuilder<'a> {
+    pub fn new_from_str(
+        source: &str,
+        ops: &'a OpTable,
+        refs: &'a RefTable,
+    ) -> ParseTreeBuilder<'a> {
         let source = Self::pre_process_string(source);
-        ParseTreeBuilder { source, ops }
+        ParseTreeBuilder { source, ops, refs }
     }
 
     pub fn pre_process_string(str: &str) -> StringBuffer {
@@ -36,7 +41,7 @@ impl<'a> ParseTreeBuilder<'a> {
         while index < chars.len() {
             match chars[index] {
                 '(' => {
-                    if let Some(l) = working_buffer.pull_literal(self.ops) {
+                    if let Some(l) = working_buffer.pull_literal(self.ops, self.refs) {
                         literals.push(l)
                     }
 
@@ -51,7 +56,7 @@ impl<'a> ParseTreeBuilder<'a> {
                     index = close;
                 }
                 ' ' => {
-                    if let Some(l) = working_buffer.pull_literal(self.ops) {
+                    if let Some(l) = working_buffer.pull_literal(self.ops, self.refs) {
                         literals.push(l)
                     }
                 }
@@ -60,7 +65,7 @@ impl<'a> ParseTreeBuilder<'a> {
             index = index + 1;
         }
 
-        if let Some(l) = working_buffer.pull_literal(self.ops) {
+        if let Some(l) = working_buffer.pull_literal(self.ops, self.refs) {
             literals.push(l)
         }
 

@@ -1,3 +1,5 @@
+use std::hash::Hasher;
+
 use crate::parser::{BytePointer, errors::InternalError, heap::BytePtr};
 
 #[derive(Debug)]
@@ -71,6 +73,25 @@ impl Clone for Literal {
                 let y: BytePointer<i32> = BytePointer::from_raw_ptr(x);
                 Literal::Pointer(Box::new(y))
             }
+        }
+    }
+}
+
+impl PartialEq for Literal {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_string() == other.as_string()
+    }
+}
+
+impl Eq for Literal {}
+
+impl std::hash::Hash for Literal {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        match &self {
+            Literal::Word(s) => s.hash(state),
+            Literal::Operator(op) => op.hash(state),
+            Literal::Expression(v) => self.as_string().hash(state),
+            Literal::Pointer(p) => p.as_raw_ptr().hash(state),
         }
     }
 }

@@ -1,5 +1,5 @@
 use bytemuck::{AnyBitPattern, NoUninit};
-use std::{fmt::Debug, marker::PhantomData};
+use std::{fmt::Debug, hash::Hash, marker::PhantomData};
 
 use crate::generics::{Byteable, NumericType};
 
@@ -15,14 +15,14 @@ pub trait BytePtr: Debug {
     fn as_i32_byte_pointer(&self) -> BytePointer<i32>;
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BytePointer<T: Byteable> {
     pub index: usize,
     pub byte_len: usize,
     primitive: PhantomData<T>,
 }
 
-impl<T: Byteable + Debug> BytePtr for BytePointer<T> {
+impl<T: Byteable + Debug + Hash + PartialEq> BytePtr for BytePointer<T> {
     fn as_raw_ptr(&self) -> u64 {
         let ptr: u64 = ((self.index as u64) << 32) | (self.byte_len as u64);
         ptr
