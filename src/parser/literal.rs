@@ -1,11 +1,11 @@
-use crate::parser::errors::InternalError;
+use crate::parser::{BytePointer, errors::InternalError, heap::BytePtr};
 
 #[derive(Debug)]
 pub enum Literal {
     Word(String),
     Operator(Operand),
     Expression(Vec<Literal>),
-    Specifier(String),
+    Pointer(Box<dyn BytePtr>),
 }
 
 #[derive(Debug, Hash, PartialEq, Eq)]
@@ -40,38 +40,21 @@ impl Clone for Operand {
 }
 
 impl Literal {
-    pub fn detail_string(&self) -> String {
-        match self {
-            Literal::Word(string) => String::new() + " (WORD: " + &string + " ) ",
-            Literal::Specifier(string) => String::new() + " (WORD: " + &string + " ) ",
-            Literal::Operator(op) => String::new() + " (OP: " + &op.as_string() + " ) ",
-            Literal::Expression(literals) => {
-                String::new()
-                    + " (EXP: "
-                    + literals
-                        .iter()
-                        .map(|literal| -> String { literal.detail_string() })
-                        .collect::<String>()
-                        .as_str()
-            }
-        }
-    }
-
     pub fn as_string(&self) -> String {
         match self {
             Literal::Word(string) => string.clone(),
-            Literal::Specifier(string) => string.clone(),
             Literal::Operator(op) => op.as_string().clone(),
             Literal::Expression(v) => v.iter().map(|x| x.as_string() + " ").collect::<String>(),
+            Literal::Pointer(p) => p.as_raw_ptr().to_string(),
         }
     }
 
     pub fn ref_string(&self) -> Result<&String, InternalError> {
         match self {
             Literal::Word(string) => Ok(string),
-            Literal::Specifier(string) => Ok(string),
             Literal::Operator(op) => Ok(op.as_string()),
             Literal::Expression(v) => Err(InternalError::CannotReference),
+            Literal::Pointer(p) => Err(InternalError::CannotReference),
         }
     }
 }
@@ -81,9 +64,9 @@ impl Clone for Literal {
         println!("Cloning Literal.");
         match self {
             Literal::Word(s) => Literal::Word(s.clone()),
-            Literal::Specifier(s) => Literal::Specifier(s.clone()),
             Literal::Operator(o) => Literal::Operator(o.clone()),
             Literal::Expression(v) => Literal::Expression(v.clone()),
+            Literal::Pointer(p) => self.clone(),
         }
     }
 }

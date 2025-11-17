@@ -1,21 +1,29 @@
 use bytemuck::{AnyBitPattern, NoUninit};
-use std::marker::PhantomData;
+use std::{fmt::Debug, marker::PhantomData};
 
 use crate::generics::{Byteable, NumericType};
 
+pub trait BytePtr: Debug {
+    fn as_raw_ptr(&self) -> u64;
+    fn from_raw_ptr(raw_ptr: u64) -> Self
+    where
+        Self: Sized;
+}
+
+#[derive(Debug, Clone)]
 pub struct BytePointer<T: Byteable> {
     index: usize,
     byte_len: usize,
     primitive: PhantomData<T>,
 }
 
-impl<T: Byteable> BytePointer<T> {
-    pub fn as_raw_ptr(&self) -> u64 {
+impl<T: Byteable + Debug> BytePtr for BytePointer<T> {
+    fn as_raw_ptr(&self) -> u64 {
         let ptr: u64 = ((self.index as u64) << 32) | (self.byte_len as u64);
         ptr
     }
 
-    pub fn from_raw_ptr(raw_ptr: u64, _primitive: T) -> Self {
+    fn from_raw_ptr(raw_ptr: u64) -> Self {
         let index = (raw_ptr >> 32) as u32 as usize;
         let byte_len = (raw_ptr & 0xFFFFFFFF) as u32 as usize;
 
