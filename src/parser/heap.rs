@@ -9,6 +9,26 @@ pub struct BytePointer<T: Byteable> {
     primitive: PhantomData<T>,
 }
 
+impl<T: Byteable> BytePointer<T> {
+    pub fn as_raw_ptr(&self) -> u64 {
+        let ptr: u64 = ((self.index as u64) << 32) | (self.byte_len as u64);
+        ptr
+    }
+
+    pub fn from_raw_ptr(raw_ptr: u64, primitive: T) -> Self {
+        let bytes = raw_ptr.to_raw_bytes();
+
+        let index = u32::from_ne_bytes(bytes[0..=3].try_into().unwrap()) as usize;
+        let byte_len = u32::from_ne_bytes(bytes[4..=8].try_into().unwrap()) as usize;
+
+        Self {
+            index,
+            byte_len,
+            primitive: PhantomData,
+        }
+    }
+}
+
 pub struct ByteHeap {
     heap: Box<[u8]>,
     last_occupied_index: usize,
