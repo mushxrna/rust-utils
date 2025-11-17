@@ -17,6 +17,7 @@ impl<T: Byteable> BytePointer<T> {
 
     pub fn from_raw_ptr(raw_ptr: u64, primitive: T) -> Self {
         let bytes = raw_ptr.to_raw_bytes();
+        println!("{}", bytes.len());
 
         let index = u32::from_ne_bytes(bytes[0..3].try_into().unwrap()) as usize;
         let byte_len = u32::from_ne_bytes(bytes[4..7].try_into().unwrap()) as usize;
