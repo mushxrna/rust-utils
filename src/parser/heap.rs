@@ -22,7 +22,7 @@ pub struct BytePointer<T: Byteable> {
     primitive: PhantomData<T>,
 }
 
-impl<T: Byteable + Debug + Hash + PartialEq> BytePtr for BytePointer<T> {
+impl<T: Byteable + Debug> BytePtr for BytePointer<T> {
     fn as_raw_ptr(&self) -> u64 {
         let ptr: u64 = ((self.index as u64) << 32) | (self.byte_len as u64);
         ptr
