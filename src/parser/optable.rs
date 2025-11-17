@@ -16,8 +16,8 @@ impl OpTable {
     }
 
     pub fn insert(&mut self, op: Operand, func: Box<dyn Fn(&Vec<&Literal>) -> Literal>) {
-        self.function_table.insert(op.as_string().to_owned(), func);
-        self.operand_table.insert(op.as_string().to_owned(), op);
+        self.function_table.insert(op.ref_string().to_owned(), func);
+        self.operand_table.insert(op.ref_string().to_owned(), op);
     }
 
     pub fn contains(&self, string: &String) -> bool {
@@ -25,7 +25,7 @@ impl OpTable {
     }
 
     pub fn call_by_operand(&self, op: &Operand, args: &Vec<&Literal>) -> Literal {
-        self.function_table[op.as_string()](args)
+        self.function_table[op.ref_string()](args)
     }
 
     pub fn insert_binary_op(&mut self, str: &str, func: fn(&Vec<&Literal>) -> Literal) {

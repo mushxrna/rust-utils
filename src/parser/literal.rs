@@ -1,4 +1,4 @@
-use std::hash::Hasher;
+use std::{borrow::Cow, hash::Hasher};
 
 use crate::parser::{BytePointer, errors::InternalError, heap::BytePtr};
 
@@ -19,7 +19,7 @@ pub enum Operand {
 }
 
 impl Operand {
-    pub fn as_string(&self) -> &String {
+    pub fn ref_string(&self) -> &String {
         match self {
             Operand::Binary(op) => op,
             Operand::DropIn(op) => op,
@@ -33,10 +33,10 @@ impl Clone for Operand {
     fn clone(&self) -> Self {
         println!("Cloning Operand.");
         match self {
-            Operand::DropIn(s) => Operand::DropIn(self.as_string().clone()),
-            Operand::Binary(s) => Operand::Binary(self.as_string().clone()),
-            Operand::Function(s) => Operand::Function(self.as_string().clone()),
-            Operand::Assignment(s) => Operand::Assignment(self.as_string().clone()),
+            Operand::DropIn(s) => Operand::DropIn(self.ref_string().clone()),
+            Operand::Binary(s) => Operand::Binary(self.ref_string().clone()),
+            Operand::Function(s) => Operand::Function(self.ref_string().clone()),
+            Operand::Assignment(s) => Operand::Assignment(self.ref_string().clone()),
         }
     }
 }
@@ -45,7 +45,7 @@ impl Literal {
     pub fn as_string(&self) -> String {
         match self {
             Literal::Word(string) => string.clone(),
-            Literal::Operator(op) => op.as_string().clone(),
+            Literal::Operator(op) => op.ref_string().clone(),
             Literal::Expression(v) => v.iter().map(|x| x.as_string() + " ").collect::<String>(),
             Literal::Pointer(p) => p.as_raw_ptr().to_string(),
         }
@@ -54,9 +54,20 @@ impl Literal {
     pub fn ref_string(&self) -> Result<&String, InternalError> {
         match self {
             Literal::Word(string) => Ok(string),
-            Literal::Operator(op) => Ok(op.as_string()),
+            Literal::Operator(op) => Ok(op.ref_string()),
             Literal::Expression(v) => Err(InternalError::CannotReferenceExprStr),
             Literal::Pointer(p) => Err(InternalError::CannotReferencePtrStr),
+        }
+    }
+
+    pub fn as_cow(&self) -> Cow<'_, str> {
+        match self {
+            Literal::Word(string) => Cow::Borrowed(string),
+            Literal::Operator(op) => Cow::Borrowed(op.ref_string()),
+            Literal::Expression(v) => {
+                Cow::Owned(v.iter().map(|x| x.as_string() + " ").collect::<String>())
+            }
+            Literal::Pointer(p) => Cow::Owned(p.as_raw_ptr().to_string()),
         }
     }
 }
