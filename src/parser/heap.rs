@@ -12,8 +12,8 @@ pub trait BytePtr: Debug {
 
 #[derive(Debug, Clone)]
 pub struct BytePointer<T: Byteable> {
-    index: usize,
-    byte_len: usize,
+    pub index: usize,
+    pub byte_len: usize,
     primitive: PhantomData<T>,
 }
 
