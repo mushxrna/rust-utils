@@ -33,9 +33,12 @@ impl OpTable {
         self.insert(op, Box::new(func))
     }
 
-    pub fn insert_dropin_op(&mut self, str: &str, func: fn(&Vec<&Literal>) -> Literal) {
+    pub fn insert_dropin_op(&mut self, str: &str, replace: String) {
         let op = Operand::DropIn(str.to_owned());
-        self.insert(op, Box::new(func))
+        self.insert(
+            op,
+            Box::new(move |l| -> Literal { Literal::Word(replace.clone()) }),
+        )
     }
 
     pub fn insert_function_op(&mut self, str: &str, func: fn(&Vec<&Literal>) -> Literal) {
