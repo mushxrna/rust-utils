@@ -11,6 +11,8 @@ pub trait BytePtr: Debug {
 
     fn into_f32_byte_pointer(self) -> BytePointer<f32>;
     fn into_i32_byte_pointer(self) -> BytePointer<i32>;
+    fn as_f32_byte_pointer(&self) -> BytePointer<f32>;
+    fn as_i32_byte_pointer(&self) -> BytePointer<i32>;
 }
 
 #[derive(Debug, Clone)]
@@ -46,6 +48,22 @@ impl<T: Byteable + Debug> BytePtr for BytePointer<T> {
     }
 
     fn into_i32_byte_pointer(self) -> BytePointer<i32> {
+        BytePointer {
+            index: self.index,
+            byte_len: self.byte_len,
+            primitive: PhantomData,
+        }
+    }
+
+    fn as_f32_byte_pointer(&self) -> BytePointer<f32> {
+        BytePointer {
+            index: self.index,
+            byte_len: self.byte_len,
+            primitive: PhantomData,
+        }
+    }
+
+    fn as_i32_byte_pointer(&self) -> BytePointer<i32> {
         BytePointer {
             index: self.index,
             byte_len: self.byte_len,
