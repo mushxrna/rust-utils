@@ -19,7 +19,7 @@ impl<T: Byteable> BytePointer<T> {
         let bytes = raw_ptr.to_raw_bytes();
 
         let index = u32::from_ne_bytes(bytes[0..3].try_into().unwrap()) as usize;
-        let byte_len = u32::from_ne_bytes(bytes[4..8].try_into().unwrap()) as usize;
+        let byte_len = u32::from_ne_bytes(bytes[4..7].try_into().unwrap()) as usize;
 
         Self {
             index,
