@@ -20,7 +20,7 @@ pub trait Iop: Any + Debug + Send + Sync {
 
     fn as_any(&self) -> &dyn Any;
 
-    fn parse_rule() -> &'static dyn Fn(String) -> Option<WordKindId>
+    fn parse_rule() -> fn(String) -> Option<WordKindId>
     where
         Self: Sized;
 }
@@ -29,7 +29,7 @@ pub struct TypeTable {
     id_to_parser: HashMap<WordKindId, Box<dyn Fn(Literal) -> Result<Box<dyn Any>, String>>>,
     id_to_serializer: HashMap<WordKindId, Box<dyn Fn(&dyn Any) -> Literal>>,
     typeid_to_id: HashMap<TypeId, WordKindId>,
-    parsing_rules: Vec<&'static dyn Fn(String) -> Option<WordKindId>>,
+    parsing_rules: Vec<fn(String) -> Option<WordKindId>>,
 }
 
 impl TypeTable {
