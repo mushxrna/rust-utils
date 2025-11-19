@@ -24,6 +24,7 @@ pub trait Iop: Any + Debug + Send + Sync {
 pub struct TypeTable {
     id_to_parser: HashMap<WordKindId, Box<dyn Fn(Literal) -> Result<Box<dyn Any>, String>>>,
     id_to_serializer: HashMap<WordKindId, Box<dyn Fn(&dyn Any) -> Literal>>,
+    typeid_to_id: HashMap<TypeId, WordKindId>,
 }
 
 impl TypeTable {
@@ -31,11 +32,13 @@ impl TypeTable {
         Self {
             id_to_parser: HashMap::new(),
             id_to_serializer: HashMap::new(),
+            typeid_to_id: HashMap::new(),
         }
     }
 
     pub fn register<T: Iop>(&mut self) {
         let id = T::id();
+        let typeid = TypeId::of::<T>();
 
         self.id_to_parser
             .insert(id.clone(), Box::new(|l| T::from_literal(l)));
@@ -44,6 +47,7 @@ impl TypeTable {
             id.clone(),
             Box::new(|a| a.downcast_ref::<T>().map(|x| x.to_literal()).unwrap()),
         );
+        self.typeid_to_id.insert(typeid, id.clone());
     }
 
     pub fn parse_into_typed<T: Iop + Clone>(
@@ -59,5 +63,12 @@ impl TypeTable {
                 .clone()),
             _ => Err("Err".to_owned()),
         }
+    }
+
+    pub fn serialize_into_literal(&self, value: &dyn Any) -> Result<Literal, String> {
+        let typeid = value.type_id();
+        let id = self.typeid_to_id[&typeid].clone();
+
+        Ok(self.id_to_serializer[&id](value))
     }
 }
