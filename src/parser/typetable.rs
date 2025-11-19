@@ -57,7 +57,7 @@ impl TypeTable {
         self.parsing_rules.push(T::parse_rule());
     }
 
-    pub fn parse_into_typed<T: Iop + Clone>(
+    pub fn parse_into_typed<T: Iop + Clone + Sized>(
         &self,
         l: &Literal,
         kind: WordKindId,
