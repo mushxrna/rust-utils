@@ -5,12 +5,14 @@ mod optable;
 mod parser;
 mod reftable;
 mod string_buffer;
+mod typetable;
 
 pub use errors::*;
 pub use literal::*;
 
 pub use heap::{ByteHeap, BytePointer, BytePtr};
 pub use parser::{ParseTree, ParseTreeBuilder};
+pub use typetable::{TypeTable, WordKindId};
 
 pub use optable::OpTable;
 pub use reftable::RefTable;

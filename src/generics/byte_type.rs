@@ -17,6 +17,7 @@ impl ManagedBytes {
 pub trait Byteable {
     fn to_raw_bytes(self) -> Vec<u8>;
     fn to_managed_bytes(self) -> ManagedBytes;
+    fn as_raw_bytes(&self) -> Vec<u8>;
 }
 
 impl<T: NumericType> Byteable for T {
@@ -28,6 +29,9 @@ impl<T: NumericType> Byteable for T {
             bytes: self.to_raw_bytes(),
             typename: std::any::type_name::<T>().to_owned(),
         }
+    }
+    fn as_raw_bytes(&self) -> Vec<u8> {
+        self.clone().to_raw_bytes()
     }
 }
 
@@ -41,6 +45,10 @@ impl<T: NumericType> Byteable for &[T] {
             typename: std::any::type_name::<T>().to_owned(),
         }
     }
+
+    fn as_raw_bytes(&self) -> Vec<u8> {
+        self.to_owned().to_raw_bytes()
+    }
 }
 
 impl<T: NumericType> Byteable for Vec<T> {
@@ -53,9 +61,7 @@ impl<T: NumericType> Byteable for Vec<T> {
             typename: std::any::type_name::<T>().to_owned(),
         }
     }
-}
-
-pub fn test() {
-    let x = &[1, 2];
-    x.to_raw_bytes();
+    fn as_raw_bytes(&self) -> Vec<u8> {
+        self.clone().to_raw_bytes()
+    }
 }

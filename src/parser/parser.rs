@@ -2,7 +2,8 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use crate::extensions::string_ext::StringExt;
-use crate::parser::{Literal, OpTable, Operand, RefTable, StringBuffer};
+use crate::generics::Byteable;
+use crate::parser::{Literal, OpTable, Operand, RefTable, StringBuffer, WordKindId};
 
 pub struct ParseTreeBuilder<'a> {
     source: StringBuffer,
@@ -88,4 +89,21 @@ impl ParseTree {
             expression: expression,
         }
     }
+
+    /*
+    pub fn deduce_types(&mut self) {
+        let untyped = if let Literal::Expression(x) = &self.expression {
+            x
+        } else {
+            &vec![]
+        };
+
+
+        let typed = untyped.iter().map(|l| -> Literal {
+            match l {
+                Literal::Word(s) => Literal::TypedWord(string, ()),
+            }
+        });
+    }
+    */
 }

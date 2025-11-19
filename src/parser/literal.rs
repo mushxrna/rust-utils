@@ -1,10 +1,11 @@
 use std::{borrow::Cow, hash::Hasher};
 
-use crate::parser::{BytePointer, errors::InternalError, heap::BytePtr};
+use crate::parser::*;
 
 #[derive(Debug)]
 pub enum Literal {
     Word(String),
+    TypedWord(String, WordKindId),
     Operator(Operand),
     Expression(Vec<Literal>),
     Pointer(Box<dyn BytePtr>),
@@ -44,7 +45,7 @@ impl Clone for Operand {
 impl Literal {
     pub fn as_string(&self) -> String {
         match self {
-            Literal::Word(string) => string.clone(),
+            Literal::Word(string) | Literal::TypedWord(string, _) => string.clone(),
             Literal::Operator(op) => op.ref_string().clone(),
             Literal::Expression(v) => v.iter().map(|x| x.as_string() + " ").collect::<String>(),
             Literal::Pointer(p) => p.as_raw_ptr().to_string(),
@@ -53,7 +54,7 @@ impl Literal {
 
     pub fn ref_string(&self) -> Result<&String, InternalError> {
         match self {
-            Literal::Word(string) => Ok(string),
+            Literal::Word(string) | Literal::TypedWord(string, _) => Ok(string),
             Literal::Operator(op) => Ok(op.ref_string()),
             Literal::Expression(v) => Err(InternalError::CannotReferenceExprStr),
             Literal::Pointer(p) => Err(InternalError::CannotReferencePtrStr),
@@ -62,7 +63,7 @@ impl Literal {
 
     pub fn as_cow(&self) -> Cow<'_, str> {
         match self {
-            Literal::Word(string) => Cow::Borrowed(string),
+            Literal::Word(string) | Literal::TypedWord(string, _) => Cow::Borrowed(string),
             Literal::Operator(op) => Cow::Borrowed(op.ref_string()),
             Literal::Expression(v) => {
                 Cow::Owned(v.iter().map(|x| x.as_string() + " ").collect::<String>())
@@ -76,7 +77,7 @@ impl Clone for Literal {
     fn clone(&self) -> Self {
         println!("Cloning Literal.");
         match self {
-            Literal::Word(s) => Literal::Word(s.clone()),
+            Literal::Word(string) | Literal::TypedWord(string, _) => Literal::Word(string.clone()),
             Literal::Operator(o) => Literal::Operator(o.clone()),
             Literal::Expression(v) => Literal::Expression(v.clone()),
             Literal::Pointer(p) => {
@@ -99,7 +100,7 @@ impl Eq for Literal {}
 impl std::hash::Hash for Literal {
     fn hash<H: Hasher>(&self, state: &mut H) {
         match &self {
-            Literal::Word(s) => s.hash(state),
+            Literal::Word(s) | Literal::TypedWord(s, _) => s.hash(state),
             Literal::Operator(op) => op.hash(state),
             Literal::Expression(v) => self.as_string().hash(state),
             Literal::Pointer(p) => p.as_raw_ptr().hash(state),
