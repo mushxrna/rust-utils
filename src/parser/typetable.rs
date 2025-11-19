@@ -2,12 +2,13 @@ use std::any::{Any, TypeId};
 use std::collections::HashMap;
 use std::fmt::Debug;
 
+use crate::generics::Byteable;
 use crate::parser::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct WordKindId(pub String);
 
-pub trait Iop: Any + Debug + Send + Sync {
+pub trait Iop: Byteable + Clone {
     fn from_literal(literal: Literal) -> Result<Box<dyn Any>, String>
     where
         Self: Sized;
@@ -19,6 +20,7 @@ pub trait Iop: Any + Debug + Send + Sync {
         Self: Sized;
 
     fn as_any(&self) -> &dyn Any;
+    fn as_byteable(&self) -> &dyn Byteable;
 
     fn parse_rule() -> fn(String) -> Option<WordKindId>
     where
@@ -27,6 +29,7 @@ pub trait Iop: Any + Debug + Send + Sync {
 
 pub struct TypeTable {
     id_to_parser: HashMap<WordKindId, Box<dyn Fn(Literal) -> Result<Box<dyn Any>, String>>>,
+    id_to_byteable: HashMap<WordKindId, Box<dyn Fn(Literal) -> Box<dyn Byteable>>>,
     id_to_serializer: HashMap<WordKindId, Box<dyn Fn(&dyn Any) -> Literal>>,
     typeid_to_id: HashMap<TypeId, WordKindId>,
     parsing_rules: Vec<fn(String) -> Option<WordKindId>>,
@@ -37,12 +40,13 @@ impl TypeTable {
         Self {
             id_to_parser: HashMap::new(),
             id_to_serializer: HashMap::new(),
+            id_to_byteable: HashMap::new(),
             typeid_to_id: HashMap::new(),
             parsing_rules: vec![],
         }
     }
 
-    pub fn register<T: Iop>(&mut self) {
+    pub fn register<T: Iop + Any>(&mut self) {
         let id = T::id();
         let typeid = TypeId::of::<T>();
 
@@ -53,14 +57,33 @@ impl TypeTable {
             id.clone(),
             Box::new(|a| a.downcast_ref::<T>().map(|x| x.to_literal()).unwrap()),
         );
+
+        self.id_to_byteable.insert(
+            id.clone(),
+            Box::new(|a| {
+                match a.clone() {
+                    Literal::TypedWord(s, id) => {
+                        return Box::new(
+                            T::from_literal(a)
+                                .unwrap()
+                                .downcast_ref::<T>()
+                                .unwrap()
+                                .clone(),
+                        );
+                    }
+                    _ => panic!(),
+                };
+            }),
+        );
+
         self.typeid_to_id.insert(typeid, id.clone());
         self.parsing_rules.push(T::parse_rule());
     }
 
-    pub fn parse_into_typed<T: Iop + Clone + Sized>(
+    pub fn parse_into_typed<T: Iop + Clone + Sized + Any>(
         &self,
         l: &Literal,
-        kind: WordKindId,
+        kind: &WordKindId,
     ) -> Result<T, String> {
         match l {
             Literal::Word(s) => Ok(self.id_to_parser[&kind](l.clone())
@@ -68,6 +91,7 @@ impl TypeTable {
                 .downcast_ref::<T>()
                 .unwrap()
                 .clone()),
+            //Literal::TypedWord(s, id) => Ok(),
             _ => Err("Err".to_owned()),
         }
     }
@@ -87,5 +111,13 @@ impl TypeTable {
             }
         }
         Err("No matching type pattern".to_owned())
+    }
+
+    pub fn auto_parse(&self, l: &Literal) -> Result<Box<dyn Byteable>, String> {
+        let typed = self.match_first_type(l)?;
+        match typed.clone() {
+            Literal::TypedWord(s, id) => Ok(self.id_to_byteable[&id](typed)),
+            _ => Err("Failed to determine type".to_owned()),
+        }
     }
 }
