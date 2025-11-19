@@ -14,7 +14,7 @@ pub trait Iop: Any + Debug + Send + Sync {
 
     fn to_literal(&self) -> Literal;
 
-    fn id() -> &'static WordKindId
+    fn id() -> WordKindId
     where
         Self: Sized;
 
