@@ -79,7 +79,7 @@ impl TypeTable {
         Ok(self.id_to_serializer[&id](value))
     }
 
-    pub fn match_first_type(&self, lit: Literal) -> Result<Literal, String> {
+    pub fn match_first_type(&self, lit: &Literal) -> Result<Literal, String> {
         let s = lit.as_string();
         for i in &self.parsing_rules {
             if let Some(id) = i(s.clone()) {
