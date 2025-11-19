@@ -1,8 +1,10 @@
 use bytemuck::Pod;
 use bytemuck::cast_slice;
+use std::any::TypeId;
 
 use crate::generics::{NumericType, VectorType};
 
+#[derive(Clone)]
 pub struct ManagedBytes {
     pub bytes: Vec<u8>,
     pub typename: String,
@@ -11,6 +13,20 @@ pub struct ManagedBytes {
 impl ManagedBytes {
     pub fn release<T: Pod>(self) -> Vec<T> {
         cast_slice(&self.bytes).into()
+    }
+}
+
+impl Byteable for ManagedBytes {
+    fn to_raw_bytes(self) -> Vec<u8> {
+        self.bytes
+    }
+
+    fn to_managed_bytes(self) -> ManagedBytes {
+        self
+    }
+
+    fn as_raw_bytes(&self) -> Vec<u8> {
+        self.clone().to_raw_bytes()
     }
 }
 
