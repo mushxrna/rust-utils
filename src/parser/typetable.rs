@@ -27,6 +27,13 @@ pub struct TypeTable {
 }
 
 impl TypeTable {
+    pub fn new() -> Self {
+        Self {
+            id_to_parser: HashMap::new(),
+            id_to_serializer: HashMap::new(),
+        }
+    }
+
     pub fn register<T: Iop>(&mut self) {
         let id = T::id();
 
