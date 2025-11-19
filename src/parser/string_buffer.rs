@@ -70,9 +70,7 @@ impl StringBuffer {
             if ops.contains(&string) {
                 Some(Literal::Operator(ops.operand_table[&string].clone()))
             } else if refs.contains(&s_as_literal) {
-                Some(Literal::Expression(vec![
-                    refs.retrieve(&s_as_literal).clone(),
-                ]))
+                Some(refs.retrieve(&s_as_literal).clone())
             } else {
                 Some(Literal::Word(string))
             }

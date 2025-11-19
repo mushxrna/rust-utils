@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use crate::extensions::string_ext::StringExt;
-use crate::parser::{Literal, OpTable, Operand, RefTable, StringBuffer};
+use crate::parser::*;
 
 pub struct ParseTreeBuilder<'a> {
     source: StringBuffer,
@@ -30,7 +30,7 @@ impl<'a> ParseTreeBuilder<'a> {
         StringBuffer::new(Some(str.replace("\n", " ") + " "))
     }
 
-    pub fn expressionize_buffer(&self, buf: &StringBuffer) -> Literal {
+    pub fn expressionize_buffer(&self, buf: &StringBuffer) -> Expression {
         let chars: Vec<char> = buf.ref_chars().collect();
 
         let mut literals = Vec::new();
@@ -52,7 +52,7 @@ impl<'a> ParseTreeBuilder<'a> {
                     let new_buffer =
                         StringBuffer::new(Some(chars[(index + 1)..close].into_iter().collect()));
 
-                    literals.push(Self::expressionize_buffer(self, &new_buffer));
+                    literals.append(&mut self.expressionize_buffer(&new_buffer).inner());
                     index = close;
                 }
                 ' ' => {
@@ -69,7 +69,7 @@ impl<'a> ParseTreeBuilder<'a> {
             literals.push(l)
         }
 
-        Literal::Expression(literals)
+        Expression(literals)
     }
 
     pub fn build(self) -> ParseTree {
@@ -79,11 +79,11 @@ impl<'a> ParseTreeBuilder<'a> {
 }
 
 pub struct ParseTree {
-    pub expression: Literal,
+    pub expression: Expression,
 }
 
 impl ParseTree {
-    pub fn new(expression: Literal) -> ParseTree {
+    pub fn new(expression: Expression) -> ParseTree {
         ParseTree {
             expression: expression,
         }
