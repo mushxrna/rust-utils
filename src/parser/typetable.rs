@@ -9,7 +9,6 @@ use crate::parser::*;
 pub struct WordKindId(pub String);
 
 pub trait KindWrapper<T>: Iop {}
-
 impl<T: Iop, Z> KindWrapper<Z> for T {}
 
 pub trait Iop: Byteable + Clone {
@@ -84,7 +83,7 @@ impl TypeTable {
         self.parsing_rules.push(T::parse_rule());
     }
 
-    pub fn parse_into_typed<T: Iop + Clone + Sized + Any>(
+    pub fn parse_into_typed<T: KindWrapper<Z> + 'static, Z>(
         &self,
         l: &Literal,
         kind: &WordKindId,
