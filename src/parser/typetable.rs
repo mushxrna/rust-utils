@@ -8,8 +8,9 @@ use crate::parser::*;
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct WordKindId(pub String);
 
-pub trait KindWrapper<T>: Iop {}
-impl<T: Iop, Z> KindWrapper<Z> for T {}
+pub trait KindWrapper<T>: Iop {
+    fn as_inner(self) -> T;
+}
 
 pub trait Iop: Byteable + Clone {
     fn from_literal(literal: Literal) -> Result<Box<dyn Any>, String>

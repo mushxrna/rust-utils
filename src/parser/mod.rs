@@ -12,7 +12,7 @@ pub use literal::*;
 
 pub use heap::{ByteHeap, BytePointer, BytePtr};
 pub use parser::{ParseTree, ParseTreeBuilder};
-pub use typetable::{Iop, TypeTable, WordKindId};
+pub use typetable::{Iop, KindWrapper, TypeTable, WordKindId};
 
 pub use optable::OpTable;
 pub use reftable::RefTable;
