@@ -117,7 +117,7 @@ impl TypeTable {
         let typed = self.match_first_type(l)?;
         match typed.clone() {
             Literal::TypedWord(s, id) => Ok(self.id_to_byteable[&id](typed)),
-            _ => Err("Failed to determine type".to_owned()),
+            _ => Err("Failed to determine type of ".to_owned() + &typed.as_string()),
         }
     }
 }
