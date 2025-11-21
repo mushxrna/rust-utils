@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use bytemuck::NoUninit;
 
 use crate::generics::Byteable;
@@ -13,6 +15,7 @@ pub trait NumericType:
     + NoUninit
     + Clone
     + Copy
+    + FromStr
 {
     fn to_f32(self) -> f32;
     fn from_f32(value: f32) -> Self;
