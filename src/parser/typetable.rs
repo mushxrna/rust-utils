@@ -86,7 +86,7 @@ impl TypeTable {
         kind: &WordKindId,
     ) -> Result<T, String> {
         match l {
-            Literal::Word(s) => Ok(self.id_to_parser[&kind](l.clone())
+            Literal::Word(s) | Literal::TypedWord(s, _) => Ok(self.id_to_parser[&kind](l.clone())
                 .unwrap()
                 .downcast_ref::<T>()
                 .unwrap()
