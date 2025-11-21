@@ -16,6 +16,7 @@ pub trait NumericType:
     + Clone
     + Copy
     + FromStr
+    + ToString
 {
     fn to_f32(self) -> f32;
     fn from_f32(value: f32) -> Self;
