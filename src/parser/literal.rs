@@ -77,7 +77,8 @@ impl Clone for Literal {
     fn clone(&self) -> Self {
         println!("Cloning Literal.");
         match self {
-            Literal::Word(string) | Literal::TypedWord(string, _) => Literal::Word(string.clone()),
+            Literal::Word(string) => Literal::Word(string.clone()),
+            Literal::TypedWord(string, id) => Literal::TypedWord(string.clone(), id.clone()),
             Literal::Operator(o) => Literal::Operator(o.clone()),
             Literal::Expression(v) => Literal::Expression(v.clone()),
             Literal::Pointer(p) => {
