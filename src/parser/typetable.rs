@@ -8,6 +8,8 @@ use crate::parser::*;
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct WordKindId(pub String);
 
+pub trait KindWrapper<T>: Iop {}
+
 pub trait Iop: Byteable + Clone {
     fn from_literal(literal: Literal) -> Result<Box<dyn Any>, String>
     where
@@ -46,7 +48,7 @@ impl TypeTable {
         }
     }
 
-    pub fn register<T: Iop + Any>(&mut self) {
+    pub fn register<Z: 'static, T: KindWrapper<Z> + 'static>(&mut self) {
         let id = T::id();
         let typeid = TypeId::of::<T>();
 
