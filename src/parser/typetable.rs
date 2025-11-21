@@ -25,6 +25,8 @@ pub trait Iop: Byteable + Clone {
     fn parse_rule() -> fn(String) -> Option<WordKindId>
     where
         Self: Sized;
+
+    fn get() -> Self;
 }
 
 pub struct TypeTable {
