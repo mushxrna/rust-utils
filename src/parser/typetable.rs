@@ -10,7 +10,7 @@ pub struct WordKindId(pub String);
 
 pub trait KindWrapper<T>: Iop {}
 
-impl<T: Iop> KindWrapper<T> for T {}
+impl<T: Iop, Z> KindWrapper<Z> for T {}
 
 pub trait Iop: Byteable + Clone {
     fn from_literal(literal: Literal) -> Result<Box<dyn Any>, String>
