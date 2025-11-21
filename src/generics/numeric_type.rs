@@ -52,6 +52,14 @@ impl NumericType for f64 {
         value as Self
     }
 }
+impl NumericType for u8 {
+    fn to_f32(self) -> f32 {
+        self as f32
+    }
+    fn from_f32(value: f32) -> Self {
+        value as Self
+    }
+}
 impl NumericType for u32 {
     fn to_f32(self) -> f32 {
         self as f32
