@@ -60,7 +60,7 @@ impl OpTable {
         self.insert(op, Box::new(func))
     }
 
-    pub fn insert_assignment_op(&mut self, str: &str) {
+    pub fn insert_assignment_op(&self, str: &str) {
         let op = Operand::Assignment(str.to_owned());
         self.insert(
             op,
