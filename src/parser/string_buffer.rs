@@ -68,7 +68,9 @@ impl StringBuffer {
             let s_as_literal = Literal::Word(string.clone());
 
             if ops.contains(&string) {
-                Some(Literal::Operator(ops.operand_table[&string].clone()))
+                Some(Literal::Operator(
+                    ops.operand_table.borrow()[&string].clone(),
+                ))
             } else if refs.contains(&s_as_literal) {
                 Some(Literal::Expression(vec![
                     refs.retrieve(&s_as_literal).clone(),
