@@ -1,6 +1,6 @@
 use bytemuck::Pod;
 
-use crate::generics::{Byteable, NumericType, byte_type::ManagedBytes};
+use crate::generics::{Byteable, NumericType};
 
 pub trait VectorType<T: NumericType> {
     fn len(&self) -> usize;
