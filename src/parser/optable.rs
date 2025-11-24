@@ -1,47 +1,49 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
 
 use crate::parser::{Literal, Operand};
 
 pub struct OpTable {
-    pub function_table: HashMap<String, Box<dyn Fn(&Vec<&Literal>) -> Result<Literal, String>>>,
-    pub operand_table: HashMap<String, Operand>,
+    pub function_table:
+        RefCell<HashMap<String, Box<dyn Fn(&Vec<&Literal>) -> Result<Literal, String>>>>,
+    pub operand_table: RefCell<HashMap<String, Operand>>,
 }
 
 impl OpTable {
     pub fn new() -> OpTable {
         OpTable {
-            function_table: HashMap::new(),
-            operand_table: HashMap::new(),
+            function_table: RefCell::new(HashMap::new()),
+            operand_table: RefCell::new(HashMap::new()),
         }
     }
 
     pub fn insert(
-        &mut self,
+        &self,
         op: Operand,
         func: Box<dyn Fn(&Vec<&Literal>) -> Result<Literal, String>>,
     ) {
-        self.function_table.insert(op.ref_string().to_owned(), func);
-        self.operand_table.insert(op.ref_string().to_owned(), op);
+        self.function_table
+            .borrow_mut()
+            .insert(op.ref_string().to_owned(), func);
+        self.operand_table
+            .borrow_mut()
+            .insert(op.ref_string().to_owned(), op);
     }
 
     pub fn contains(&self, string: &String) -> bool {
-        self.operand_table.contains_key(string)
+        self.operand_table.borrow().contains_key(string)
     }
 
     pub fn call_by_operand(&self, op: &Operand, args: &Vec<&Literal>) -> Result<Literal, String> {
-        self.function_table[op.ref_string()](args)
+        self.function_table.borrow()[op.ref_string()](args)
     }
 
-    pub fn insert_binary_op(
-        &mut self,
-        str: &str,
-        func: fn(&Vec<&Literal>) -> Result<Literal, String>,
-    ) {
+    pub fn insert_binary_op(&self, str: &str, func: fn(&Vec<&Literal>) -> Result<Literal, String>) {
         let op = Operand::Binary(str.to_owned());
         self.insert(op, Box::new(func))
     }
 
-    pub fn insert_dropin_op(&mut self, str: &str, replace: Literal) {
+    pub fn insert_dropin_op(&self, str: &str, replace: Literal) {
         let op = Operand::DropIn(str.to_owned());
         self.insert(
             op,
@@ -50,7 +52,7 @@ impl OpTable {
     }
 
     pub fn insert_function_op(
-        &mut self,
+        &self,
         str: &str,
         func: fn(&Vec<&Literal>) -> Result<Literal, String>,
     ) {
