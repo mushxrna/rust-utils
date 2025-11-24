@@ -22,7 +22,7 @@ pub trait ByteHeap {
     fn copy_slice_into<T: Byteable>(&self, slice: &[T]) -> Result<impl HeapPtr, String> {
         let bytes: Vec<u8> = slice
             .iter()
-            .map(|obj| -> Vec<u8> { obj.as_raw_bytes() })
+            .map(|obj| -> Vec<u8> { obj.copy_bytes() })
             .flatten()
             .collect();
 
@@ -80,7 +80,7 @@ impl XHeap {
 
 impl ByteHeap for XHeap {
     fn insert_bytes<T: Byteable>(&self, obj: T) -> Result<impl HeapPtr, String> {
-        let bytes = obj.to_raw_bytes();
+        let bytes = obj.to_bytes();
 
         let start = *self.last_occupied_index.borrow();
         let len = bytes.len();
