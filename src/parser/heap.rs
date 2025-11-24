@@ -50,7 +50,7 @@ impl HeapPtr for &dyn HeapPtr {
         HeapPtr::raw(*self)
     }
     fn len(&self) -> usize {
-        HeapPtr::raw(*self)
+        HeapPtr::len(*self)
     }
 }
 
