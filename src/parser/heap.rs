@@ -78,8 +78,9 @@ impl ByteHeap for XHeap {
         for i in 0..len {
             let current = start + i;
             self.heap.borrow_mut()[current] = bytes[i];
-            self.last_occupied_index.replace(current);
         }
+
+        self.last_occupied_index.replace(start + len);
 
         Ok(XPtr::new(start, bytes.len()))
     }
