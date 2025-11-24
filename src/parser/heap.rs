@@ -19,9 +19,15 @@ pub trait ByteHeap {
     fn insert_bytes<T: Byteable>(&self, obj: T) -> Result<impl HeapPtr, String>;
     fn view_untyped(&self, ptr: impl HeapPtr) -> Result<impl Deref<Target = [u8]>, String>;
 
-    //fn copy_slice_into<T>(&self, slice: T) -> Result<impl HeapPtr, String> {
+    fn copy_slice_into<T: Byteable>(&self, slice: &[T]) -> Result<impl HeapPtr, String> {
+        let bytes: Vec<u8> = slice
+            .iter()
+            .map(|obj| -> Vec<u8> { obj.as_raw_bytes() })
+            .flatten()
+            .collect();
 
-    //}
+        self.insert_bytes(bytes)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -33,6 +39,10 @@ pub struct XPtr {
 impl XPtr {
     pub fn new(index: usize, byte_len: usize) -> Self {
         Self { index, byte_len }
+    }
+
+    pub fn reconstruct(ptr: impl HeapPtr) -> Self {
+        Self::new(ptr.raw(), ptr.len())
     }
 }
 
