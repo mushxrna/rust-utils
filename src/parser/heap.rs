@@ -18,6 +18,10 @@ pub trait TypedHeapPtr<T>: HeapPtr {}
 pub trait ByteHeap {
     fn insert_bytes<T: Byteable>(&self, obj: T) -> Result<impl HeapPtr, String>;
     fn view_untyped(&self, ptr: impl HeapPtr) -> Result<impl Deref<Target = [u8]>, String>;
+
+    //fn copy_slice_into<T>(&self, slice: T) -> Result<impl HeapPtr, String> {
+
+    //}
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -38,6 +42,15 @@ impl HeapPtr for XPtr {
     }
     fn len(&self) -> usize {
         self.byte_len
+    }
+}
+
+impl HeapPtr for &dyn HeapPtr {
+    fn raw(&self) -> usize {
+        HeapPtr::raw(*self)
+    }
+    fn len(&self) -> usize {
+        HeapPtr::raw(*self)
     }
 }
 
