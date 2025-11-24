@@ -73,7 +73,7 @@ impl StringBuffer {
                 ))
             } else if refs.contains(&s_as_literal) {
                 Some(Literal::Expression(vec![
-                    refs.retrieve(&s_as_literal).clone(),
+                    refs.retrieve(&s_as_literal).unwrap().clone(),
                 ]))
             } else {
                 Some(Literal::Word(string))
