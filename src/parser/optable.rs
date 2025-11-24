@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::parser::{Literal, Operand};
 
 pub struct OpTable {
-    pub function_table: HashMap<String, Box<dyn Fn(&Vec<&Literal>) -> Literal>>,
+    pub function_table: HashMap<String, Box<dyn Fn(&Vec<&Literal>) -> Result<Literal, String>>>,
     pub operand_table: HashMap<String, Operand>,
 }
 
@@ -15,7 +15,11 @@ impl OpTable {
         }
     }
 
-    pub fn insert(&mut self, op: Operand, func: Box<dyn Fn(&Vec<&Literal>) -> Literal>) {
+    pub fn insert(
+        &mut self,
+        op: Operand,
+        func: Box<dyn Fn(&Vec<&Literal>) -> Result<Literal, String>>,
+    ) {
         self.function_table.insert(op.ref_string().to_owned(), func);
         self.operand_table.insert(op.ref_string().to_owned(), op);
     }
@@ -24,21 +28,32 @@ impl OpTable {
         self.operand_table.contains_key(string)
     }
 
-    pub fn call_by_operand(&self, op: &Operand, args: &Vec<&Literal>) -> Literal {
+    pub fn call_by_operand(&self, op: &Operand, args: &Vec<&Literal>) -> Result<Literal, String> {
         self.function_table[op.ref_string()](args)
     }
 
-    pub fn insert_binary_op(&mut self, str: &str, func: fn(&Vec<&Literal>) -> Literal) {
+    pub fn insert_binary_op(
+        &mut self,
+        str: &str,
+        func: fn(&Vec<&Literal>) -> Result<Literal, String>,
+    ) {
         let op = Operand::Binary(str.to_owned());
         self.insert(op, Box::new(func))
     }
 
     pub fn insert_dropin_op(&mut self, str: &str, replace: Literal) {
         let op = Operand::DropIn(str.to_owned());
-        self.insert(op, Box::new(move |l| -> Literal { replace.clone() }))
+        self.insert(
+            op,
+            Box::new(move |l| -> Result<Literal, String> { Ok(replace.clone()) }),
+        )
     }
 
-    pub fn insert_function_op(&mut self, str: &str, func: fn(&Vec<&Literal>) -> Literal) {
+    pub fn insert_function_op(
+        &mut self,
+        str: &str,
+        func: fn(&Vec<&Literal>) -> Result<Literal, String>,
+    ) {
         let op = Operand::Function(str.to_owned());
         self.insert(op, Box::new(func))
     }
@@ -47,7 +62,7 @@ impl OpTable {
         let op = Operand::Assignment(str.to_owned());
         self.insert(
             op,
-            Box::new(|v| -> Literal { Literal::Word("".to_string()) }),
+            Box::new(|v| -> Result<Literal, String> { Ok(Literal::Word("".to_string())) }),
         )
     }
 }
