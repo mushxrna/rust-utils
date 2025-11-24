@@ -10,7 +10,7 @@ mod typetable;
 pub use errors::*;
 pub use literal::*;
 
-pub use heap::{ByteHeap, HeapPtr, XPtr};
+pub use heap::{ByteHeap, HeapPtr, XHeap, XPtr};
 pub use parser::{ParseTree, ParseTreeBuilder};
 pub use typetable::{Iop, KindWrapper, TypeTable, WordKindId};
 
