@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter, Result};
 
-use crate::parser::Literal;
+use crate::parser::{Literal, WordKindId};
 
 #[derive(Debug)]
 pub enum ParseError {
@@ -42,3 +42,31 @@ impl Display for InternalError {
 }
 
 impl std::error::Error for InternalError {}
+
+#[derive(Debug)]
+pub enum TypeTableError {
+    CannotParseInto(Literal, WordKindId),
+    CannotMatchType(Literal),
+}
+
+impl Display for TypeTableError {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        match self {
+            Self::CannotParseInto(l, id) => {
+                let lit_str = &l.as_string();
+                let id_str = &id.0;
+                write!(
+                    f,
+                    "Cannot parse literal: ({}) into type: ({})",
+                    lit_str, id_str
+                )
+            }
+            Self::CannotMatchType(l) => {
+                let lit_str = &l.as_string();
+                write!(f, "Cannot identify type of literal: ({})", lit_str)
+            }
+        }
+    }
+}
+
+impl std::error::Error for TypeTableError {}

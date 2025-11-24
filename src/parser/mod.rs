@@ -1,3 +1,4 @@
+mod byte_buffer;
 mod errors;
 mod heap;
 mod literal;
@@ -14,6 +15,7 @@ pub use heap::{ByteHeap, HeapPtr, XHeap, XPtr};
 pub use parser::{ParseTree, ParseTreeBuilder};
 pub use typetable::{Iop, KindWrapper, TypeTable, WordKindId};
 
+pub use byte_buffer::ByteBuffer;
 pub use optable::OpTable;
 pub use reftable::RefTable;
 pub use string_buffer::StringBuffer;
