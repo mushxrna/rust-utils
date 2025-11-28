@@ -2,12 +2,12 @@ use std::any::Any;
 use std::borrow::Borrow;
 use crate::parsing::{Rule, RuleSet};
 
-struct MatchRule<'a, T: ?Sized, Z> {
+pub struct MatchRule<'a, T: ?Sized, Z> {
     pub rule: Box<&'a dyn Fn(&T) -> Option<Z>>,
     pub priority: usize
 }
 
-struct MatchRuleSet<'a, T: ?Sized, Z> {
+pub struct MatchRuleSet<'a, T: ?Sized, Z> {
     pub match_rules: Vec<MatchRule<'a, T, Z>>
 }
 
