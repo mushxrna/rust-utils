@@ -1,6 +1,6 @@
 use crate::{
     generics::{NumericCollectionType, NumericType},
-    vectors::{Vec2, Vec3, Vec4},
+    graphics::vectors::{Vec2, Vec3, Vec4},
 };
 
 macro_rules! impl_add {

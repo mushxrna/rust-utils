@@ -1,5 +1,5 @@
 use crate::generics::{NumericCollectionType, NumericType, VectorType};
-use crate::wgpu_helpers::Vertex;
+use crate::graphics::wgpu_helpers::Vertex;
 
 #[derive(Clone, Copy, PartialEq)]
 pub struct Vec3<T: NumericType> {

@@ -1,4 +1,4 @@
-use crate::wgpu_helpers::config_enums::*;
+use crate::graphics::wgpu_helpers::config_enums::*;
 use wgpu::{Buffer, util::DeviceExt};
 
 pub struct BufferManager {

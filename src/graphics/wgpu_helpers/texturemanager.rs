@@ -2,7 +2,7 @@ use std::error::Error;
 
 use wgpu::{TexelCopyBufferInfo, wgt::CommandEncoderDescriptor};
 
-use crate::{
+use crate::graphics::{
     vectors::Vec2,
     wgpu_helpers::{BufferManager, BufferType, WgpuContextManager, config_enums::*},
 };

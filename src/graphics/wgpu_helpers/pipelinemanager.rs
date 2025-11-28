@@ -1,4 +1,4 @@
-use crate::{
+use crate::graphics::{
     vectors::*,
     wgpu_helpers::{
         errors::{PipelineError, ProcessError},

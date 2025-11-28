@@ -1,6 +1,6 @@
 use crate::{
     generics::NumericCollectionType,
-    vectors::{Vec3, Vec4},
+    graphics::vectors::{Vec3, Vec4},
 };
 
 #[derive(Clone, Copy, PartialEq)]

@@ -1,6 +1,6 @@
-use crate::vectors::*;
-use crate::wgpu_helpers::{WgpuContextManager, contextmanager};
-use crate::wgpu_helpers::{
+use crate::graphics::vectors::*;
+use crate::graphics::wgpu_helpers::{WgpuContextManager, contextmanager};
+use crate::graphics::wgpu_helpers::{
     errors::{self, *},
     pod_types::*,
     texturemanager::*,

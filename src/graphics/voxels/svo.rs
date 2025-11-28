@@ -1,4 +1,4 @@
-use crate::voxels::Voxel;
+use crate::graphics::voxels::Voxel;
 
 #[derive(Clone)]
 pub struct SparseVoxelOctreeNode {

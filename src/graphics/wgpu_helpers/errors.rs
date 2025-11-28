@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter, Result};
 
-use crate::wgpu_helpers::*;
+use crate::graphics::wgpu_helpers::*;
 
 #[derive(Debug)]
 pub enum PipelineError {

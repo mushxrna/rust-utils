@@ -1,5 +1,5 @@
-use crate::vectors::Vec3;
-use crate::wgpu_helpers::config_enums;
+use crate::graphics::vectors::Vec3;
+use crate::graphics::wgpu_helpers::config_enums;
 
 pub trait PodType: Copy + Clone + bytemuck::Pod + bytemuck::Zeroable {
     fn to_bytes(self) -> Vec<u8> {

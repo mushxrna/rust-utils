@@ -1,6 +1,6 @@
 use crate::{
     generics::{NumericType, VectorType},
-    vectors::Vec2,
+    graphics::vectors::Vec2,
 };
 
 pub trait NumericCollectionType<T: NumericType> {

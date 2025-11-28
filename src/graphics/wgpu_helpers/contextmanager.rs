@@ -1,4 +1,4 @@
-use crate::vectors::Vec2;
+use crate::graphics::vectors::Vec2;
 
 pub struct WgpuContextManager {
     pub device: wgpu::Device,

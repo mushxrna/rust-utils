@@ -1,4 +1,4 @@
-use crate::vectors::Vec3;
+use crate::graphics::vectors::Vec3;
 
 pub enum LocalDirection {
     Forward,

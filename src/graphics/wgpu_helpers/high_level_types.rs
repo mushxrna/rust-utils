@@ -1,8 +1,8 @@
 use crate::generics::Byteable;
 use crate::generics::VectorType;
 
-pub type Point = crate::vectors::Vec3<f32>;
-pub type Size = crate::vectors::Vec2<u32>;
+pub type Point = crate::graphics::vectors::Vec3<f32>;
+pub type Size = crate::graphics::vectors::Vec2<u32>;
 
 #[derive(Clone)]
 pub struct Ray {
