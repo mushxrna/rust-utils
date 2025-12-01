@@ -6,6 +6,10 @@ pub struct Specifier<T: RuleSet> {
 }
 
 impl<I, T: RuleSet<Result = Option<I>>> Specifier<T> {
+    pub fn new(&self, ruleset: T) -> Specifier<T> {
+        Specifier { rule_set: ruleset }
+    }
+
     pub fn specify_sliced<R: Borrow<T::Item>>(&self, slice: &[R]) -> Vec<I> {
         let mut result = vec![];
 
