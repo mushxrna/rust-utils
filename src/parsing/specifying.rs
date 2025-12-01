@@ -10,16 +10,19 @@ impl<I, T: RuleSet<Result = Option<I>>> Specifier<T> {
         Specifier { rule_set: ruleset }
     }
 
-    pub fn specify_sliced<R: Borrow<T::Item>>(&self, slice: &[R]) -> Vec<I> {
+    pub fn specify_sliced<R: Borrow<T::Item> + std::fmt::Display>(&self, slice: &[R]) -> Vec<I> {
         let mut result = vec![];
 
         for i in slice.iter() {
+            let mut found = false;
             for x in self.rule_set.get_rules() {
                 if let Some(val) = x.test(i) {
                     result.push(val);
+                    found = true;
                     break;
                 }
             }
+            (!found).then(|| panic!("could not specify molecule! molecule : {i}"));
         }
 
         result
