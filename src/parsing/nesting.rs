@@ -74,6 +74,9 @@ pub struct Nester<T> {
 }
 
 impl<T: PartialEq> Nester<T> {
+    pub fn new(delimiters: (T, T)) -> Nester<T> {
+        Nester { delimiters }
+    }
     pub fn nest_into_object<'a>(&self, source: &'a [T]) -> NestedObject<&'a T> {
         let source_vec: Vec<&'a T> = source.iter().collect();
 

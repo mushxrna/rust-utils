@@ -6,7 +6,11 @@ impl<T> Splitter<T>
 where
     T: PartialEq,
 {
-    fn split<'a>(&self, source: &'a [T]) -> Vec<&'a [T]> {
+    pub fn new(indicator: T) -> Splitter<T> {
+        Splitter { indicator }
+    }
+
+    pub fn split<'a>(&self, source: &'a [T]) -> Vec<&'a [T]> {
         let mut index_buffer = vec![];
         let mut result = vec![];
 
@@ -26,7 +30,7 @@ where
         result
     }
 
-    fn split_on_and<'a, F, R>(&self, source: &'a [T], f: F) -> Vec<R>
+    pub fn split_on_and<'a, F, R>(&self, source: &'a [T], f: F) -> Vec<R>
     where
         F: Fn(&'a [T]) -> R,
         T: 'a,
