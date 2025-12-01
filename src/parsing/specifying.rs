@@ -1,0 +1,23 @@
+use crate::parsing::rules::*;
+use std::borrow::Borrow;
+
+pub struct Specifier<T: RuleSet> {
+    rule_set: T,
+}
+
+impl<I, T: RuleSet<Result = Option<I>>> Specifier<T> {
+    pub fn specify_sliced<R: Borrow<T::Item>>(&self, slice: &[R]) -> Vec<I> {
+        let mut result = vec![];
+
+        for i in slice.iter() {
+            for x in self.rule_set.get_rules() {
+                if let Some(val) = x.test(i) {
+                    result.push(val);
+                    break;
+                }
+            }
+        }
+
+        result
+    }
+}

@@ -1,4 +1,4 @@
-use crate::parsing::{Rule, RuleSet};
+use crate::parsing::rules::{Rule, RuleSet};
 use std::any::Any;
 use std::borrow::Borrow;
 
