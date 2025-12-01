@@ -1,4 +1,4 @@
-use crate::parsing::rules::{Rule, RuleSet};
+use crate::parsing::rules::{Rule, RuleSet, match_rules};
 use std::any::Any;
 use std::borrow::Borrow;
 
@@ -9,6 +9,14 @@ pub struct MatchRule<T: ?Sized, Z> {
 
 pub struct MatchRuleSet<T: ?Sized, Z> {
     pub match_rules: Vec<MatchRule<T, Z>>,
+}
+
+impl<T: ?Sized, Z> Default for MatchRuleSet<T, Z> {
+    fn default() -> Self {
+        Self {
+            match_rules: vec![],
+        }
+    }
 }
 
 impl<T: ?Sized, Z> Rule for MatchRule<T, Z> {

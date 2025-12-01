@@ -8,7 +8,7 @@ pub trait Rule {
     fn test<R: Borrow<Self::Item>>(&self, eval: &R) -> Self::Result;
 }
 
-pub trait RuleSet {
+pub trait RuleSet: Default {
     type Item: ?Sized;
     type Result;
 
