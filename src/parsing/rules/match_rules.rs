@@ -3,7 +3,7 @@ use std::any::Any;
 use std::borrow::Borrow;
 
 pub struct MatchRule<T: ?Sized, Z> {
-    pub rule: Box<dyn Fn(&T) -> Option<Z>>,
+    pub rule: Box<dyn for<'a> Fn(&'a T) -> Option<Z>>,
     pub priority: usize,
 }
 
