@@ -15,7 +15,7 @@ pub struct MatchRuleSet<Item: ?Sized, Result> {
 }
 
 pub struct RefMatchRule<'rule, Input: ?Sized, Result> {
-    pub rule: Box<dyn Fn(&Input) -> Option<Result> + 'rule>,
+    pub rule: Box<dyn for<'a> Fn(&'a Input) -> Option<Result> + 'rule>,
     pub priority: usize,
 }
 
