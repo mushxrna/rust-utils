@@ -10,7 +10,10 @@ impl<I, T: RuleSet<Result = Option<I>>> Specifier<T> {
         Specifier { rule_set: ruleset }
     }
 
-    pub fn specify_sliced<R: Borrow<T::Item> + std::fmt::Display>(&self, slice: &[R]) -> Vec<I> {
+    pub fn specify_sliced<R: Borrow<T::Item> + Borrow<dyn std::fmt::Display>>(
+        &self,
+        slice: &[R],
+    ) -> Vec<I> {
         let mut result = vec![];
 
         for i in slice.iter() {
@@ -22,7 +25,12 @@ impl<I, T: RuleSet<Result = Option<I>>> Specifier<T> {
                     break;
                 }
             }
-            (!found).then(|| panic!("could not specify molecule! molecule : {i}"));
+            (!found).then(|| {
+                panic!(
+                    "could not specify molecule! molecule : {}",
+                    <R as Borrow<dyn std::fmt::Display>>::borrow(i)
+                )
+            });
         }
 
         result
