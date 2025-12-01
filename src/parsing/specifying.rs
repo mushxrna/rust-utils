@@ -6,7 +6,7 @@ pub struct Specifier<T: RuleSet> {
 }
 
 impl<I, T: RuleSet<Result = Option<I>>> Specifier<T> {
-    pub fn new(&self, ruleset: T) -> Specifier<T> {
+    pub fn new(ruleset: T) -> Specifier<T> {
         Specifier { rule_set: ruleset }
     }
 
