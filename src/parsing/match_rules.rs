@@ -15,8 +15,8 @@ impl<T: ?Sized, Z> Rule for MatchRule<T, Z> {
     type Item = T;
     type Result = Option<Z>;
 
-    fn test(&self, eval: &Self::Item) -> Self::Result {
-        (self.rule)(eval)
+    fn test<F: Borrow<Self::Item>>(&self, eval: &F) -> Self::Result {
+        (self.rule)(eval.borrow())
     }
 }
 

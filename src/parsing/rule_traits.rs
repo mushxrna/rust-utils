@@ -5,7 +5,7 @@ pub trait Rule {
     type Item: ?Sized;
     type Result;
 
-    fn test(&self, eval: &Self::Item) -> Self::Result;
+    fn test<R: Borrow<Self::Item>>(&self, eval: &R) -> Self::Result;
 }
 
 pub trait RuleSet {
@@ -20,7 +20,7 @@ pub trait RuleSet {
     fn test_all<R: Borrow<Self::Item>>(&self, obj: R) -> Vec<Self::Result> {
         self.get_rules()
             .iter()
-            .map(|rule| -> Self::Result { rule.test(obj.borrow()) })
+            .map(|rule| -> Self::Result { rule.test(&obj) })
             .collect()
     }
 }
