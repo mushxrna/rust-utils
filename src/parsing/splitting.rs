@@ -1,18 +1,23 @@
 use std::ops::RangeInclusive;
 
-pub struct Splitter<T> {
-    indicator: T,
+pub struct Splitter<A> {
+    indicator: A,
 }
 
-impl<T> Splitter<T>
+impl<A> Splitter<A>
 where
-    T: PartialEq,
+    A: PartialEq,
 {
-    pub fn new(indicator: T) -> Splitter<T> {
-        Splitter { indicator }
+    pub fn new<IntoA: ToOwned<Owned = A>>(indicator: IntoA) -> Splitter<A> {
+        Splitter {
+            indicator: indicator.to_owned(),
+        }
     }
 
-    pub fn split<'a>(&self, source: &'a [T]) -> Vec<&'a [T]> {
+    pub fn split_into_slices<'a, CompA: PartialEq<A>>(
+        &self,
+        source: &'a [CompA],
+    ) -> Vec<&'a [CompA]> {
         let mut index_buffer = vec![];
         let mut result = vec![];
 
@@ -31,7 +36,7 @@ where
 
         result
     }
-
+    /*
     pub fn split_on_and<'a, F, R>(&self, source: &'a [T], f: F) -> Vec<R>
     where
         F: Fn(&'a [T]) -> R,
@@ -40,8 +45,11 @@ where
         let x = self.split(source);
         x.into_iter().map(|e| -> R { f(e) }).collect()
     }
-
-    pub fn split_into_ranges(&self, source: &[T]) -> Vec<RangeInclusive<usize>> {
+    */
+    pub fn split_into_ranges<CompA: PartialEq<A>>(
+        &self,
+        source: &[A],
+    ) -> Vec<RangeInclusive<usize>> {
         let mut index_buffer = vec![];
         let mut result = vec![];
 
