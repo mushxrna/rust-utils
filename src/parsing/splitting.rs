@@ -8,9 +8,9 @@ impl<A> Splitter<A>
 where
     A: PartialEq,
 {
-    pub fn new<IntoA: ToOwned<Owned = A>>(indicator: IntoA) -> Splitter<A> {
+    pub fn new(indicator: A) -> Splitter<A> {
         Splitter {
-            indicator: indicator.to_owned(),
+            indicator: indicator,
         }
     }
 
