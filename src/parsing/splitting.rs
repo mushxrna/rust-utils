@@ -1,3 +1,5 @@
+use std::ops::RangeInclusive;
+
 pub struct Splitter<T> {
     indicator: T,
 }
@@ -37,5 +39,25 @@ where
     {
         let x = self.split(source);
         x.into_iter().map(|e| -> R { f(e) }).collect()
+    }
+
+    pub fn split_into_ranges(&self, source: &[T]) -> Vec<RangeInclusive<usize>> {
+        let mut index_buffer = vec![];
+        let mut result = vec![];
+
+        for (i, x) in source.iter().enumerate() {
+            if x != &self.indicator {
+                index_buffer.push(i);
+            } else {
+                let (begin, end) = (index_buffer[0], *index_buffer.last().unwrap());
+                result.push(begin..=end);
+                index_buffer.clear();
+            }
+        }
+
+        let (last_begin, last_end) = (index_buffer[0], *index_buffer.last().unwrap());
+        result.push(last_begin..=last_end);
+
+        result
     }
 }
