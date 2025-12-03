@@ -1,4 +1,5 @@
 mod match_rules;
+mod rule_map;
 mod rule_traits;
 
 pub use match_rules::{MatchRule, MatchRuleSet, RefMatchRule, RefMatchRuleSet};
