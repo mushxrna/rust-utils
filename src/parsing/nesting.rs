@@ -12,6 +12,7 @@ pub struct IndexNode {
 }
 pub struct IndexTree {
     nodes: Vec<IndexNode>,
+    root: IndexNode,
 }
 pub struct Nester<A> {
     pub delimiters: (A, A),
@@ -187,7 +188,15 @@ impl<A: PartialEq> Nester<A> {
             }
         }
 
-        IndexTree { nodes: result }
+        let l = result.len();
+
+        IndexTree {
+            nodes: result,
+            root: IndexNode {
+                range: 0..0,
+                children: Some(0..l),
+            },
+        }
     }
 }
 //
