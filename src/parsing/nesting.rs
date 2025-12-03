@@ -12,7 +12,7 @@ pub struct IndexNode {
 }
 pub struct IndexTree {
     nodes: Vec<IndexNode>,
-    root: IndexNode,
+    pub root: IndexNode,
 }
 pub struct Nester<A> {
     pub delimiters: (A, A),
