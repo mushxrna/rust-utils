@@ -1,4 +1,4 @@
-use std::ops::Range;
+use std::ops::{Index, Range};
 //
 // ENUMS AND STRUCTS
 //
@@ -34,6 +34,10 @@ impl IndexNode {
 
     pub fn get_end(&self) -> usize {
         self.range.end
+    }
+
+    pub fn ref_into<'a, A: Index<usize, Output = B>, B>(&self, s: &'a A) -> &'a B {
+        &s[self.get_start()]
     }
 }
 impl IndexTree {
