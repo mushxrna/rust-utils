@@ -22,7 +22,7 @@ impl<A: std::cmp::Eq + Hash, R> RuleMap<A, R> {
         self.map.insert(item, ArgRule { rule: rule });
     }
 
-    pub fn evaluate(self, item: A, args: &[A]) -> Option<R> {
+    pub fn evaluate(&self, item: A, args: &[A]) -> Option<R> {
         Some((self.map.get(&item)?.rule)(args))
     }
 }
