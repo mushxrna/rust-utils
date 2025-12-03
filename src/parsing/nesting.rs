@@ -1,14 +1,41 @@
 use std::ops::Range;
-
-pub enum NestedObject<T> {
-    Atom(T),
-    Molecule(Vec<NestedObject<T>>),
+//
+// ENUMS AND STRUCTS
+//
+pub enum NestedObject<A> {
+    Atom(A),
+    Molecule(Vec<NestedObject<A>>),
 }
-
+pub struct IndexNode {
+    range: Range<usize>,
+    children: Option<Range<usize>>,
+}
 pub struct IndexTree {
     nodes: Vec<IndexNode>,
 }
+pub struct Nester<A> {
+    pub delimiters: (A, A),
+}
+//
+// IMPL METHODS
+//
+impl IndexNode {
+    pub fn get_children(&self) -> &Option<Range<usize>> {
+        &self.children
+    }
 
+    pub fn get_range(&self) -> Range<usize> {
+        self.range.clone()
+    }
+
+    pub fn get_start(&self) -> usize {
+        self.range.start
+    }
+
+    pub fn get_end(&self) -> usize {
+        self.range.end
+    }
+}
 impl IndexTree {
     pub fn get_nodes(&self) -> &Vec<IndexNode> {
         &self.nodes
@@ -30,55 +57,12 @@ impl IndexTree {
         result
     }
 }
-
-pub struct IndexNode {
-    range: Range<usize>,
-    children: Option<Range<usize>>,
-}
-
-impl IndexNode {
-    pub fn get_children(&self) -> &Option<Range<usize>> {
-        &self.children
-    }
-
-    pub fn get_range(&self) -> Range<usize> {
-        self.range.clone()
-    }
-
-    pub fn get_start(&self) -> usize {
-        self.range.start
-    }
-
-    pub fn get_end(&self) -> usize {
-        self.range.end
-    }
-}
-
-impl<T: std::fmt::Display> std::fmt::Display for NestedObject<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        match self {
-            NestedObject::Atom(value) => write!(f, "Atom: {value}"),
-            NestedObject::Molecule(vec) => {
-                let mut s = String::new();
-                for i in vec {
-                    s.push_str(&format!("{i} "))
-                }
-                write!(f, "Molecule: ( {s} )")
-            }
-        }
-    }
-}
-
-pub struct Nester<T> {
-    pub delimiters: (T, T),
-}
-
-impl<T: PartialEq> Nester<T> {
-    pub fn new(delimiters: (T, T)) -> Nester<T> {
+impl<A: PartialEq> Nester<A> {
+    pub fn new(delimiters: (A, A)) -> Nester<A> {
         Nester { delimiters }
     }
-    pub fn nest_into_object<'a>(&self, source: &'a [T]) -> NestedObject<&'a T> {
-        let source_vec: Vec<&'a T> = source.iter().collect();
+    pub fn nest_into_object<'a>(&self, source: &'a [A]) -> NestedObject<&'a A> {
+        let source_vec: Vec<&'a A> = source.iter().collect();
 
         let mut result = vec![];
 
@@ -121,26 +105,29 @@ impl<T: PartialEq> Nester<T> {
         NestedObject::Molecule(result)
     }
 
-    pub fn nest_into_tree<'a>(&self, source: &'a [T]) -> IndexTree {
+    pub fn nest_into_tree<CompA: PartialEq<A>>(&self, source: &[CompA]) -> IndexTree {
         self._nest_tree_recursive(source, 0)
     }
 
-    fn _nest_tree_recursive<'a>(&self, source: &'a [T], offset: usize) -> IndexTree {
-        let source_vec: Vec<&'a T> = source.iter().collect();
+    fn _nest_tree_recursive<CompA>(&self, source: &[CompA], offset: usize) -> IndexTree
+    where
+        CompA: PartialEq<A>,
+    {
+        let source_vec: Vec<&CompA> = source.iter().collect();
 
         let mut result = vec![];
 
         let mut index = 0;
 
-        while index < source_vec.len() {
-            let value = source_vec[index];
+        while index < source.len() {
+            let value = &source[index];
 
             if value == &self.delimiters.0 {
-                let mut possible_range = source_vec[index..].iter();
+                let mut possible_range = source[index..].iter();
                 let mut delimiters_found = 0;
                 let mut distance = 0;
 
-                while let Some(&item) = possible_range.next() {
+                while let Some(item) = possible_range.next() {
                     if item == &self.delimiters.0 {
                         delimiters_found += 1;
                     } else if item == &self.delimiters.1 {
@@ -197,5 +184,22 @@ impl<T: PartialEq> Nester<T> {
         }
 
         IndexTree { nodes: result }
+    }
+}
+//
+// IMPL DISPLAY
+//
+impl<T: std::fmt::Display> std::fmt::Display for NestedObject<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        match self {
+            NestedObject::Atom(value) => write!(f, "Atom: {value}"),
+            NestedObject::Molecule(vec) => {
+                let mut s = String::new();
+                for i in vec {
+                    s.push_str(&format!("{i} "))
+                }
+                write!(f, "Molecule: ( {s} )")
+            }
+        }
     }
 }
