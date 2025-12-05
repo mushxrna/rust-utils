@@ -1,5 +1,8 @@
 use crate::parsing::Molecule;
-use std::ops::{Deref, Index, Range};
+use std::{
+    clone,
+    ops::{Deref, Index, Range},
+};
 //
 // ENUMS AND STRUCTS
 //
@@ -7,6 +10,7 @@ pub enum NestedObject<A> {
     Atom(A),
     Molecule(Vec<NestedObject<A>>),
 }
+#[derive(Clone)]
 pub struct IndexNode {
     index: Option<usize>,             // points to an index in a SPLIT source.
     children: Option<Vec<IndexNode>>, //child nodes.
