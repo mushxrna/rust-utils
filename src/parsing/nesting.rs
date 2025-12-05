@@ -88,6 +88,7 @@ impl<A: Molecule> Nester<A> {
                 let exc_range = (index + 1)..(index + dist_to_match - 1); //does not
                 let evaluated_node = self.nest_into_tree(&source[exc_range]);
                 node_pool.push(evaluated_node);
+                index += dist_to_match;
             } else if i != &*self.delimiters.1 {
                 node_pool.push(IndexNode {
                     index: Some(index),
