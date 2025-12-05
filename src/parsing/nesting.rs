@@ -115,14 +115,14 @@ impl<A: Molecule> Nester<A> {
 
     pub fn nest_into_tree<CompA>(&self, source: &[CompA]) -> IndexTree
     where
-        for<'a> &'a CompA: PartialEq<&'a [A::Atom]>,
+        CompA: AsRef<[A::Atom]>,
     {
         self._nest_tree_recursive(source, 0)
     }
 
     fn _nest_tree_recursive<CompA>(&self, source: &[CompA], offset: usize) -> IndexTree
     where
-        for<'a> &'a CompA: PartialEq<&'a [A::Atom]>,
+        CompA: AsRef<[A::Atom]>,
     {
         let source_vec: Vec<&CompA> = source.iter().collect();
 
@@ -133,15 +133,15 @@ impl<A: Molecule> Nester<A> {
         while index < source.len() {
             let value = &source[index];
 
-            if value == &*self.delimiters.0 {
+            if value.as_ref() == &*self.delimiters.0 {
                 let mut possible_range = source[index..].iter();
                 let mut delimiters_found = 0;
                 let mut distance = 0;
 
                 while let Some(item) = possible_range.next() {
-                    if item == &*self.delimiters.0 {
+                    if item.as_ref() == &*self.delimiters.0 {
                         delimiters_found += 1;
-                    } else if item == &*self.delimiters.1 {
+                    } else if item.as_ref() == &*self.delimiters.1 {
                         delimiters_found -= 1;
                     }
 
