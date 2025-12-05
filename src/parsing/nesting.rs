@@ -75,11 +75,8 @@ impl<A: Molecule> Nester<A> {
                 let mut dist_to_match = 0;
 
                 for j in source[index..].iter().map(|x| x.as_ref()) {
-                    if j == &*self.delimiters.0 {
-                        delims_found += 1;
-                    } else if j == &*self.delimiters.1 {
-                        delims_found -= 1;
-                    }
+                    (j == &*self.delimiters.0).then(|| delims_found += 1);
+                    (j == &*self.delimiters.1).then(|| delims_found -= 1);
 
                     if delims_found == 0 {
                         break;
@@ -89,7 +86,8 @@ impl<A: Molecule> Nester<A> {
                 }
 
                 let exc_range = (index + 1)..(index + dist_to_match);
-                let evaluated_node = self.nest_into_tree(&source[exc_range.clone()], base + exc_range.start);
+                let evaluated_node =
+                    self.nest_into_tree(&source[exc_range.clone()], base + exc_range.start);
                 node_pool.push(evaluated_node);
                 index += dist_to_match;
             } else if i != &*self.delimiters.1 {
