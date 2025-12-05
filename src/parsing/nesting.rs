@@ -1,5 +1,5 @@
 use crate::parsing::Molecule;
-use std::ops::{Index, Range};
+use std::ops::{Deref, Index, Range};
 //
 // ENUMS AND STRUCTS
 //
@@ -32,6 +32,26 @@ impl IndexNode {
 
     pub fn get_index(&self) -> Option<usize> {
         self.index
+    }
+
+    pub fn ref_into<'a, A>(&self, source: &'a [A]) -> Result<&'a A, String> {
+        match self.get_index() {
+            Some(i) => Ok(&source[i]),
+            None => Err(String::from("Attempted to use parent node as reference.")),
+        }
+    }
+
+    pub fn get_children_or_panic(&self) -> &[IndexNode] {
+        if let Some(inner) = self.children.as_ref() {
+            inner.as_slice()
+        } else {
+            panic!("PANIC! Used get_children_or_panic on IndexNode that does not have children")
+        }
+    }
+
+    pub fn get_index_or_panic(&self) -> usize {
+        self.index
+            .expect("PANIC! Used get_index_or_panic on IndexNode that does not have an index.")
     }
 }
 
