@@ -8,8 +8,8 @@ pub enum NestedObject<A> {
     Molecule(Vec<NestedObject<A>>),
 }
 pub struct IndexNode {
-    range: Range<usize>,
-    children: Option<Range<usize>>,
+    index: Option<usize>,             // points to an index in a SPLIT source.
+    children: Option<Vec<IndexNode>>, //child nodes.
 }
 pub struct IndexTree {
     nodes: Vec<IndexNode>,
@@ -22,103 +22,68 @@ pub struct Nester<A: Molecule> {
 // IMPL METHODS
 //
 impl IndexNode {
-    pub fn get_children(&self) -> &Option<Range<usize>> {
-        &self.children
-    }
-
-    pub fn get_range(&self) -> Range<usize> {
-        self.range.clone()
-    }
-
-    pub fn get_start(&self) -> usize {
-        self.range.start
-    }
-
-    pub fn get_end(&self) -> usize {
-        self.range.end
-    }
-
-    pub fn ref_into<'a, A: Index<usize, Output = B>, B>(&self, s: &'a A) -> &'a B {
-        &s[self.get_start()]
-    }
-}
-impl IndexTree {
-    pub fn get_nodes(&self) -> &Vec<IndexNode> {
-        &self.nodes
-    }
-
-    pub fn release_nodes(self) -> Vec<IndexNode> {
-        self.nodes
-    }
-
-    pub fn ref_child_nodes(&self) -> Vec<&IndexNode> {
-        let mut result = vec![];
-
-        for i in &self.nodes {
-            if i.get_children().is_none() {
-                result.push(i)
-            }
+    pub fn get_children(&self) -> Option<&[IndexNode]> {
+        if let Some(inner) = self.children.as_ref() {
+            Some(inner.as_slice())
+        } else {
+            None
         }
+    }
 
-        result
+    pub fn get_index(&self) -> Option<usize> {
+        self.index
     }
 }
+
 impl<A: Molecule> Nester<A> {
     pub fn new(delimiters: (A, A)) -> Nester<A> {
         Nester { delimiters }
     }
-    /*
-    pub fn nest_into_object<'a>(&self, source: &'a [A]) -> NestedObject<&'a A> {
-        let source_vec: Vec<&'a A> = source.iter().collect();
-
-        let mut result = vec![];
-
+    pub fn nest_into_tree(&self, source: &[impl AsRef<[A::Atom]>]) -> IndexNode {
         let mut index = 0;
+        let mut node_pool = vec![];
 
-        while index < source_vec.len() {
-            let value = source_vec[index];
+        while index < source.len() {
+            let i = source[index].as_ref();
 
-            if value == &self.delimiters.0 {
-                let mut possible_range = source_vec[index..].iter();
-                let mut delimiters_found = 0;
-                let mut distance = 0;
+            if i == &*self.delimiters.0 {
+                let mut delims_found = 0;
+                let mut dist_to_match = 0;
 
-                while let Some(&item) = possible_range.next() {
-                    if item == &self.delimiters.0 {
-                        delimiters_found += 1;
-                    } else if item == &self.delimiters.1 {
-                        delimiters_found -= 1;
+                for j in source[index..].iter().map(|x| x.as_ref()) {
+                    if j == &*self.delimiters.0 {
+                        delims_found += 1;
+                    } else if j == &*self.delimiters.1 {
+                        delims_found -= 1;
                     }
 
-                    if delimiters_found == 0 {
+                    dist_to_match += 1;
+
+                    if delims_found == 0 {
                         break;
                     }
-
-                    distance += 1;
                 }
 
-                let (start, end) = (index + 1, index + distance);
-
-                let evaluated_inner = self.nest_into_object(&source[start..end]);
-                result.push(evaluated_inner);
-                index = end;
+                let inc_range = index..(index + dist_to_match); //includes delimiters
+                let exc_range = (index + 1)..(index + dist_to_match - 1); //does not
+                let evaluated_node = self.nest_into_tree(&source[exc_range]);
+                node_pool.push(evaluated_node);
             } else {
-                result.push(NestedObject::Atom(value))
+                node_pool.push(IndexNode {
+                    index: Some(index),
+                    children: None,
+                });
             }
 
             index += 1;
         }
-
-        NestedObject::Molecule(result)
+        IndexNode {
+            index: None,
+            children: Some(node_pool),
+        }
     }
-    */
 
-    pub fn nest_into_tree<CompA>(&self, source: &[CompA]) -> IndexTree
-    where
-        CompA: AsRef<[A::Atom]>,
-    {
-        self._nest_tree_recursive(source, 0)
-    }
+    /*
 
     fn _nest_tree_recursive<CompA>(&self, source: &[CompA], offset: usize) -> IndexTree
     where
@@ -204,6 +169,7 @@ impl<A: Molecule> Nester<A> {
             },
         }
     }
+    */
 }
 //
 // IMPL DISPLAY
