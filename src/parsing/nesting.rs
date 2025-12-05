@@ -1,3 +1,4 @@
+use crate::parsing::Molecule;
 use std::ops::{Index, Range};
 //
 // ENUMS AND STRUCTS
@@ -14,7 +15,7 @@ pub struct IndexTree {
     nodes: Vec<IndexNode>,
     pub root: IndexNode,
 }
-pub struct Nester<A> {
+pub struct Nester<A: Molecule> {
     pub delimiters: (A, A),
 }
 //
@@ -62,10 +63,11 @@ impl IndexTree {
         result
     }
 }
-impl<A: PartialEq> Nester<A> {
+impl<A: Molecule> Nester<A> {
     pub fn new(delimiters: (A, A)) -> Nester<A> {
         Nester { delimiters }
     }
+    /*
     pub fn nest_into_object<'a>(&self, source: &'a [A]) -> NestedObject<&'a A> {
         let source_vec: Vec<&'a A> = source.iter().collect();
 
@@ -109,14 +111,15 @@ impl<A: PartialEq> Nester<A> {
 
         NestedObject::Molecule(result)
     }
+    */
 
-    pub fn nest_into_tree<CompA: PartialEq<A>>(&self, source: &[CompA]) -> IndexTree {
+    pub fn nest_into_tree<CompA: PartialEq<[A::Atom]>>(&self, source: &[CompA]) -> IndexTree {
         self._nest_tree_recursive(source, 0)
     }
 
     fn _nest_tree_recursive<CompA>(&self, source: &[CompA], offset: usize) -> IndexTree
     where
-        CompA: PartialEq<A>,
+        CompA: PartialEq<[A::Atom]>,
     {
         let source_vec: Vec<&CompA> = source.iter().collect();
 
@@ -127,15 +130,15 @@ impl<A: PartialEq> Nester<A> {
         while index < source.len() {
             let value = &source[index];
 
-            if value == &self.delimiters.0 {
+            if value == &*self.delimiters.0 {
                 let mut possible_range = source[index..].iter();
                 let mut delimiters_found = 0;
                 let mut distance = 0;
 
                 while let Some(item) = possible_range.next() {
-                    if item == &self.delimiters.0 {
+                    if item == &*self.delimiters.0 {
                         delimiters_found += 1;
-                    } else if item == &self.delimiters.1 {
+                    } else if item == &*self.delimiters.1 {
                         delimiters_found -= 1;
                     }
 
@@ -161,7 +164,7 @@ impl<A: PartialEq> Nester<A> {
                     children: if evaluated_inner.is_empty() {
                         None
                     } else {
-                        Some((children_start..children_end))
+                        Some(children_start..children_end)
                     },
                 });
 
@@ -171,7 +174,7 @@ impl<A: PartialEq> Nester<A> {
                     .into_iter()
                     .map(|mut node| {
                         if let Some(x) = node.children {
-                            node.children = Some((x.start + index_offset..x.end + index_offset));
+                            node.children = Some(x.start + index_offset..x.end + index_offset);
                         }
                         node
                     })

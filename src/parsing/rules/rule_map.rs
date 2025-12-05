@@ -19,7 +19,7 @@ impl<A: std::cmp::Eq + Hash, R> RuleMap<A, R> {
     }
 
     pub fn insert(&mut self, item: A, rule: Box<dyn Fn(&[A]) -> R>) {
-        self.map.insert(item, ArgRule { rule: rule });
+        self.map.insert(item, ArgRule { rule });
     }
 
     pub fn evaluate(&self, item: A, args: &[A]) -> Option<R> {
