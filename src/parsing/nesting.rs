@@ -63,7 +63,7 @@ impl<A: Molecule> Nester<A> {
     pub fn new(delimiters: (A, A)) -> Nester<A> {
         Nester { delimiters }
     }
-    pub fn nest_into_tree(&self, source: &[impl AsRef<[A::Atom]>]) -> IndexNode {
+    pub fn nest_into_tree(&self, source: &[impl AsRef<[A::Atom]>], base: usize) -> IndexNode {
         let mut index = 0;
         let mut node_pool = vec![];
 
@@ -88,14 +88,13 @@ impl<A: Molecule> Nester<A> {
                     dist_to_match += 1;
                 }
 
-                let inc_range = index..(index + dist_to_match); //includes delimiters
-                let exc_range = (index + 1)..(index + dist_to_match); //does not
-                let evaluated_node = self.nest_into_tree(&source[exc_range]);
+                let exc_range = (index + 1)..(index + dist_to_match);
+                let evaluated_node = self.nest_into_tree(&source[exc_range.clone()], base + exc_range.start);
                 node_pool.push(evaluated_node);
                 index += dist_to_match;
             } else if i != &*self.delimiters.1 {
                 node_pool.push(IndexNode {
-                    index: Some(index),
+                    index: Some(base + index),
                     children: None,
                 });
             }
