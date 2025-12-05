@@ -81,15 +81,15 @@ impl<A: Molecule> Nester<A> {
                         delims_found -= 1;
                     }
 
-                    dist_to_match += 1;
-
                     if delims_found == 0 {
                         break;
                     }
+
+                    dist_to_match += 1;
                 }
 
                 let inc_range = index..(index + dist_to_match); //includes delimiters
-                let exc_range = (index + 1)..(index + dist_to_match); //does not
+                let exc_range = (index + 1)..(index + dist_to_match - 1); //does not
                 let evaluated_node = self.nest_into_tree(&source[exc_range]);
                 node_pool.push(evaluated_node);
                 index += dist_to_match;
