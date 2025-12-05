@@ -113,13 +113,16 @@ impl<A: Molecule> Nester<A> {
     }
     */
 
-    pub fn nest_into_tree<CompA: PartialEq<[A::Atom]>>(&self, source: &[CompA]) -> IndexTree {
+    pub fn nest_into_tree<CompA>(&self, source: &[CompA]) -> IndexTree
+    where
+        for<'a> &'a CompA: PartialEq<&'a [A::Atom]>,
+    {
         self._nest_tree_recursive(source, 0)
     }
 
     fn _nest_tree_recursive<CompA>(&self, source: &[CompA], offset: usize) -> IndexTree
     where
-        CompA: PartialEq<[A::Atom]>,
+        for<'a> &'a CompA: PartialEq<&'a [A::Atom]>,
     {
         let source_vec: Vec<&CompA> = source.iter().collect();
 
