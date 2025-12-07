@@ -1,3 +1,4 @@
+use crate::datastructures::IndexNode;
 use crate::parsing::Molecule;
 use std::{
     clone,
@@ -10,60 +11,18 @@ pub enum NestedObject<A> {
     Atom(A),
     Molecule(Vec<NestedObject<A>>),
 }
-#[derive(Clone)]
-pub struct IndexNode {
-    index: Option<usize>,             // points to an index in a SPLIT source.
-    children: Option<Vec<IndexNode>>, //child nodes.
-}
 pub struct Nester<A: Molecule> {
     pub delimiters: (A, A),
 }
 //
 // IMPL METHODS
 //
-impl IndexNode {
-    pub fn get_children(&self) -> Option<&[IndexNode]> {
-        if let Some(inner) = self.children.as_ref() {
-            Some(inner.as_slice())
-        } else {
-            None
-        }
-    }
 
-    pub fn get_index(&self) -> Option<usize> {
-        self.index
-    }
-
-    pub fn ref_into<'a, A>(&self, source: &'a [A]) -> Result<&'a A, String> {
-        match self.get_index() {
-            Some(i) => Ok(&source[i]),
-            None => Err(String::from("Attempted to use parent node as reference.")),
-        }
-    }
-
-    pub fn get_children_or_panic(&self) -> &[IndexNode] {
-        if let Some(inner) = self.children.as_ref() {
-            inner.as_slice()
-        } else {
-            panic!("PANIC! Used get_children_or_panic on IndexNode that does not have children")
-        }
-    }
-
-    pub fn get_index_or_panic(&self) -> usize {
-        self.index
-            .expect("PANIC! Used get_index_or_panic on IndexNode that does not have an index.")
-    }
-
-    pub fn collapse(self) -> Option<Vec<IndexNode>> {
-        self.children
-    }
-}
-
-impl<A: Molecule> Nester<A> {
+impl<A: Molecule + Clone> Nester<A> {
     pub fn new(delimiters: (A, A)) -> Nester<A> {
         Nester { delimiters }
     }
-    pub fn nest_into_tree(&self, source: &[impl AsRef<[A::Atom]>], base: usize) -> IndexNode {
+    pub fn nest_into_tree(&self, source: &[impl AsRef<[A::Atom]>], base: usize) -> IndexNode<A> {
         let mut index = 0;
         let mut node_pool = vec![];
 
@@ -91,18 +50,12 @@ impl<A: Molecule> Nester<A> {
                 node_pool.push(evaluated_node);
                 index += dist_to_match;
             } else if i != &*self.delimiters.1 {
-                node_pool.push(IndexNode {
-                    index: Some(base + index),
-                    children: None,
-                });
+                node_pool.push(IndexNode::new(Some(base + index), None));
             }
 
             index += 1;
         }
-        IndexNode {
-            index: None,
-            children: Some(node_pool),
-        }
+        IndexNode::new(None, Some(node_pool))
     }
 }
 //
@@ -122,9 +75,9 @@ impl<T: std::fmt::Display> std::fmt::Display for NestedObject<T> {
         }
     }
 }
-impl std::fmt::Display for IndexNode {
+impl<A: Clone> std::fmt::Display for IndexNode<A> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        match self.get_children() {
+        match self.children() {
             Some(c) => write!(f, "Parent Node! Owner of {} nodes.", c.len()),
             None => write!(f, "Child Node!"),
         }

@@ -4,7 +4,7 @@ mod specifying;
 mod splitting;
 mod traits;
 
-pub use nesting::{IndexNode, NestedObject, Nester};
+pub use nesting::{NestedObject, Nester};
 pub use specifying::Specifier;
 pub use splitting::Splitter;
 pub use traits::Molecule;

@@ -1,0 +1,89 @@
+use std::ops::Deref;
+
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum IndexNodeError {
+    #[error("Failed to get associated item.")]
+    AssociationError,
+    #[error("No associated item on node.")]
+    NoAssociationError,
+}
+
+pub enum IndexNode<A> {
+    Associated(NodeData, Option<A>),
+    NotAssociated(NodeData),
+}
+
+#[derive(Clone)]
+pub struct NodeData {
+    index: Option<usize>, //only leaf nodes have an index
+    children: Option<Vec<NodeData>>,
+}
+
+impl NodeData {
+    pub fn children(&self) -> Option<&Vec<NodeData>> {
+        self.children.as_ref()
+    }
+
+    pub fn index(&self) -> Option<usize> {
+        self.index
+    }
+}
+
+impl<A: Clone> IndexNode<A> {
+    //------------------------------------------------------------------------------------------
+    fn data(&self) -> &NodeData {
+        match self {
+            IndexNode::Associated(x, _) | IndexNode::NotAssociated(x) => x,
+        }
+    }
+
+    fn into_data(self) -> NodeData {
+        match self {
+            IndexNode::Associated(x, _) | IndexNode::NotAssociated(x) => x,
+        }
+    }
+    //------------------------------------------------------------------------------------------
+    pub fn children(&self) -> Option<Vec<IndexNode<A>>> {
+        let c = self
+            .data()
+            .children()?
+            .iter()
+            .map(|x| IndexNode::NotAssociated(x.clone()))
+            .collect();
+
+        Some(c)
+    }
+
+    pub fn index(&self) -> Option<usize> {
+        self.data().index()
+    }
+
+    pub fn is_associated(&self) -> bool {
+        matches!(self, IndexNode::Associated(_, _))
+    }
+    //------------------------------------------------------------------------------------------
+    pub fn new(index: Option<usize>, children: Option<Vec<IndexNode<A>>>) -> IndexNode<A> {
+        let c = (children.is_some())
+            .then(|| Vec::from_iter(children.unwrap().into_iter().map(|x| x.into_data())));
+
+        IndexNode::NotAssociated(NodeData { index, children: c })
+    }
+
+    pub fn associate(self, source: &[A]) -> IndexNode<A> {
+        let val = (self.index().is_some()).then(|| source[self.index().unwrap()].clone());
+
+        IndexNode::Associated(self.into_data(), val)
+    }
+    //------------------------------------------------------------------------------------------
+
+    pub fn associated(&self) -> Result<&A, IndexNodeError> {
+        match self {
+            IndexNode::Associated(data, assoc) => {
+                assoc.as_ref().ok_or(IndexNodeError::AssociationError)
+            }
+            IndexNode::NotAssociated(d) => Err(IndexNodeError::NoAssociationError),
+        }
+    }
+}

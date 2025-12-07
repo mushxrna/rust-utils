@@ -1890,6 +1890,7 @@ dependencies = [
  "bytemuck",
  "futures-intrusive",
  "image",
+ "thiserror 2.0.17",
  "wgpu",
  "winit",
 ]
