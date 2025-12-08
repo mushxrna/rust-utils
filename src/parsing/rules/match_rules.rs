@@ -1,13 +1,6 @@
 use crate::parsing::rules::{Rule, RuleSet};
 
 //
-// TRAITS
-//
-pub trait MatchOutput<'a> {
-    type Output;
-}
-
-//
 // STRUCTS
 //
 pub enum MatchRuleResult<A> {
@@ -63,32 +56,40 @@ impl<A> From<Option<A>> for MatchRuleResult<A> {
     }
 }
 
-pub struct MatchRule<Item: ?Sized, Result: for<'a> MatchOutput<'a>> {
-    pub rule: for<'a> fn(&'a Item) -> MatchRuleResult<<Result as MatchOutput<'a>>::Output>,
+impl<A> Default for MatchRuleResult<A> {
+    fn default() -> Self {
+        MatchRuleResult::NoMatch
+    }
+}
+
+pub struct MatchRule<'r, Item: ?Sized + 'r, Result> {
+    pub rule: fn(&'r Item) -> MatchRuleResult<Result>,
     pub priority: usize,
 }
 
-pub struct MatchRuleSet<Item: ?Sized, Result: for<'a> MatchOutput<'a>> {
-    pub match_rules: Vec<MatchRule<Item, Result>>,
+pub struct MatchRuleSet<'r, Item: ?Sized + 'r, Result> {
+    pub match_rules: Vec<MatchRule<'r, Item, Result>>,
 }
+
 //
 // IMPL RULE
 //
-impl<'a, A: ?Sized + 'a, B: for<'b> MatchOutput<'b>> Rule<'a> for MatchRule<A, B> {
+impl<'r, A: ?Sized + 'r, B> Rule<'r> for MatchRule<'r, A, B> {
     type Item = A;
-    type Result = MatchRuleResult<<B as MatchOutput<'a>>::Output>;
+    type Result = MatchRuleResult<B>;
 
-    fn test(&self, eval: &'a A) -> MatchRuleResult<<B as MatchOutput<'a>>::Output> {
+    fn test(&self, eval: &'r A) -> MatchRuleResult<B> {
         (self.rule)(eval)
     }
 }
+
 //
 // IMPL RULESET
 //
-impl<'a, A: ?Sized + 'a, B: for<'b> MatchOutput<'b>> RuleSet<'a> for MatchRuleSet<A, B> {
+impl<'r, A: ?Sized + 'r, B> RuleSet<'r> for MatchRuleSet<'r, A, B> {
     type Item = A;
-    type Result = MatchRuleResult<<B as MatchOutput<'a>>::Output>;
-    type Rule = MatchRule<A, B>;
+    type Result = MatchRuleResult<B>;
+    type Rule = MatchRule<'r, A, B>;
 
     fn get_rules(&self) -> &Vec<Self::Rule> {
         &self.match_rules
@@ -99,10 +100,11 @@ impl<'a, A: ?Sized + 'a, B: for<'b> MatchOutput<'b>> RuleSet<'a> for MatchRuleSe
         self.priority_sort();
     }
 }
+
 //
 // IMPL DEFAULT
 //
-impl<A: ?Sized, B: for<'a> MatchOutput<'a>> Default for MatchRuleSet<A, B> {
+impl<'r, A: ?Sized + 'r, B> Default for MatchRuleSet<'r, A, B> {
     fn default() -> Self {
         Self {
             match_rules: vec![],
@@ -110,24 +112,19 @@ impl<A: ?Sized, B: for<'a> MatchOutput<'a>> Default for MatchRuleSet<A, B> {
     }
 }
 
-impl<A> Default for MatchRuleResult<A> {
-    fn default() -> Self {
-        MatchRuleResult::NoMatch
-    }
-}
 //
 // IMPL METHODS
 //
-impl<A: ?Sized, B: for<'a> MatchOutput<'a>> MatchRule<A, B> {
+impl<'r, A: ?Sized + 'r, B> MatchRule<'r, A, B> {
     pub fn new(
-        rule: for<'a> fn(&'a A) -> MatchRuleResult<<B as MatchOutput<'a>>::Output>,
+        rule: fn(&'r A) -> MatchRuleResult<B>,
         priority: usize,
-    ) -> MatchRule<A, B> {
+    ) -> MatchRule<'r, A, B> {
         MatchRule { rule, priority }
     }
 }
 
-impl<A: ?Sized, B: for<'a> MatchOutput<'a>> MatchRuleSet<A, B> {
+impl<'r, A: ?Sized + 'r, B> MatchRuleSet<'r, A, B> {
     fn priority_sort(&mut self) {
         self.match_rules
             .sort_by_key(|rule| std::cmp::Reverse(rule.priority));
