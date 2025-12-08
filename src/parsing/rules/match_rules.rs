@@ -62,50 +62,34 @@ impl<A> Default for MatchRuleResult<A> {
     }
 }
 
-pub struct MatchRule<Item: ?Sized, F> {
-    pub rule: F,
+pub struct MatchRule<Item: ?Sized, Result> {
+    pub rule: Box<dyn Fn(&Item) -> MatchRuleResult<Result>>,
     pub priority: usize,
-    _marker: std::marker::PhantomData<fn(&Item)>,
 }
 
-pub struct MatchRuleSet<Item: ?Sized, F> {
-    pub match_rules: Vec<MatchRule<Item, F>>,
-}
-
-//
-// TRAIT FOR CALLABLE
-//
-pub trait MatchFn<Item: ?Sized> {
-    type Output<'a> where Item: 'a;
-    fn call<'a>(&self, input: &'a Item) -> Self::Output<'a>;
-}
-
-impl<A: ?Sized, R, F: Fn(&A) -> R> MatchFn<A> for F {
-    type Output<'a> = R where A: 'a;
-    fn call<'a>(&self, input: &'a A) -> R {
-        self(input)
-    }
+pub struct MatchRuleSet<Item: ?Sized, Result> {
+    pub match_rules: Vec<MatchRule<Item, Result>>,
 }
 
 //
 // IMPL RULE
 //
-impl<A: ?Sized, F: MatchFn<A>> Rule for MatchRule<A, F> {
+impl<A: ?Sized, B> Rule for MatchRule<A, B> {
     type Item = A;
-    type Result<'a> = F::Output<'a> where Self: 'a;
+    type Result<'a> = MatchRuleResult<B> where Self: 'a;
 
-    fn test<'a>(&'a self, eval: &'a A) -> F::Output<'a> {
-        self.rule.call(eval)
+    fn test<'a>(&'a self, eval: &'a A) -> MatchRuleResult<B> {
+        (self.rule)(eval)
     }
 }
 
 //
 // IMPL RULESET
 //
-impl<A: ?Sized, F: MatchFn<A>> RuleSet for MatchRuleSet<A, F> {
+impl<A: ?Sized, B> RuleSet for MatchRuleSet<A, B> {
     type Item = A;
-    type Result<'a> = F::Output<'a> where Self: 'a;
-    type Rule = MatchRule<A, F>;
+    type Result<'a> = MatchRuleResult<B> where Self: 'a;
+    type Rule = MatchRule<A, B>;
 
     fn get_rules(&self) -> &Vec<Self::Rule> {
         &self.match_rules
@@ -120,7 +104,7 @@ impl<A: ?Sized, F: MatchFn<A>> RuleSet for MatchRuleSet<A, F> {
 //
 // IMPL DEFAULT
 //
-impl<A: ?Sized, F> Default for MatchRuleSet<A, F> {
+impl<A: ?Sized, B> Default for MatchRuleSet<A, B> {
     fn default() -> Self {
         Self {
             match_rules: vec![],
@@ -131,17 +115,16 @@ impl<A: ?Sized, F> Default for MatchRuleSet<A, F> {
 //
 // IMPL METHODS
 //
-impl<A: ?Sized, F> MatchRule<A, F> {
-    pub fn new(rule: F, priority: usize) -> MatchRule<A, F> {
+impl<A: ?Sized, B> MatchRule<A, B> {
+    pub fn new<F: Fn(&A) -> MatchRuleResult<B> + 'static>(rule: F, priority: usize) -> Self {
         MatchRule {
-            rule,
+            rule: Box::new(rule),
             priority,
-            _marker: std::marker::PhantomData,
         }
     }
 }
 
-impl<A: ?Sized, F> MatchRuleSet<A, F> {
+impl<A: ?Sized, B> MatchRuleSet<A, B> {
     fn priority_sort(&mut self) {
         self.match_rules
             .sort_by_key(|rule| std::cmp::Reverse(rule.priority));
