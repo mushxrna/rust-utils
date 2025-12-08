@@ -10,7 +10,7 @@ impl<T: RuleSet> Specifier<T> {
         Specifier { rule_set: ruleset }
     }
 
-    pub fn specify_ref<I>(&self, item: &T::Item) -> I
+    pub fn specify_ref<'a, 'b, I>(&'a self, item: &'b T::Item) -> I
     where
         T: RuleSet<Result = Option<I>>,
     {
