@@ -1,7 +1,3 @@
-use std::any::Any;
-use std::borrow::Borrow;
-use std::ops::Deref;
-
 pub trait Rule {
     type Item: ?Sized;
     type Result;
@@ -12,7 +8,6 @@ pub trait Rule {
 pub trait RuleSet: Default {
     type Item: ?Sized;
     type Result;
-
     type Rule: Rule<Item = Self::Item, Result = Self::Result>;
 
     fn get_rules(&self) -> &Vec<Self::Rule>;
@@ -21,7 +16,18 @@ pub trait RuleSet: Default {
     fn test_all(&self, obj: &Self::Item) -> Vec<Self::Result> {
         self.get_rules()
             .iter()
-            .map(|rule| -> Self::Result { rule.test(&obj) })
+            .map(|rule| rule.test(obj))
             .collect()
+    }
+
+    fn first_match(&self, obj: &Self::Item) -> Self::Result
+    where
+        Self::Result: Default,
+    {
+        self.get_rules()
+            .iter()
+            .map(|rule| rule.test(obj))
+            .find(|_| true)
+            .unwrap_or_default()
     }
 }

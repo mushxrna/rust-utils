@@ -1,5 +1,4 @@
 use crate::parsing::rules::*;
-use std::{borrow::Borrow, fmt::Result};
 
 pub struct Specifier<T: RuleSet> {
     rule_set: T,
@@ -10,14 +9,14 @@ impl<T: RuleSet> Specifier<T> {
         Specifier { rule_set: ruleset }
     }
 
-    pub fn specify_ref<'a, 'b, I>(&'a self, item: &'b T::Item) -> I
+    pub fn specify<I>(&self, item: &T::Item) -> Option<I>
     where
-        T: RuleSet<Result = Option<I>>,
+        T: RuleSet<Result = MatchRuleResult<I>>,
     {
         self.rule_set
             .test_all(item)
             .into_iter()
-            .find_map(|x| x)
-            .unwrap()
+            .find(|r| r.is_match())
+            .and_then(|r| r.into_inner())
     }
 }
