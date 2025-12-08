@@ -5,18 +5,18 @@ use std::borrow::Borrow;
 //
 // STRUCTS
 //
-pub struct MatchRule<Item: ?Sized, Result> {
-    pub rule: Box<dyn for<'a> Fn(&'a Item) -> Option<Result>>,
+pub struct MatchRule<'a, Item: ?Sized, Result> {
+    pub rule: Box<dyn Fn(&Item) -> Option<Result> + 'a>,
     pub priority: usize,
 }
 
-pub struct MatchRuleSet<Item: ?Sized, Result> {
-    pub match_rules: Vec<MatchRule<Item, Result>>,
+pub struct MatchRuleSet<'a, Item: ?Sized, Result> {
+    pub match_rules: Vec<MatchRule<'a, Item, Result>>,
 }
 //
 // IMPL RULE
 //
-impl<A: ?Sized, B> Rule for MatchRule<A, B> {
+impl<'a, A: ?Sized, B> Rule for MatchRule<'a, A, B> {
     type Item = A;
     type Result = Option<B>;
 
@@ -27,11 +27,11 @@ impl<A: ?Sized, B> Rule for MatchRule<A, B> {
 //
 // IMPL RULESET
 //
-impl<A: ?Sized, B> RuleSet for MatchRuleSet<A, B> {
+impl<'a, A: ?Sized, B> RuleSet for MatchRuleSet<'a, A, B> {
     type Item = A;
     type Result = Option<B>;
 
-    type Rule = MatchRule<A, B>;
+    type Rule = MatchRule<'a, A, B>;
 
     fn get_rules(&self) -> &Vec<Self::Rule> {
         &self.match_rules
@@ -45,7 +45,7 @@ impl<A: ?Sized, B> RuleSet for MatchRuleSet<A, B> {
 //
 // IMPL DEFAULT
 //
-impl<A: ?Sized, B> Default for MatchRuleSet<A, B> {
+impl<'a, A: ?Sized, B> Default for MatchRuleSet<'a, A, B> {
     fn default() -> Self {
         Self {
             match_rules: vec![],
@@ -55,13 +55,13 @@ impl<A: ?Sized, B> Default for MatchRuleSet<A, B> {
 //
 // IMPL METHODS
 //
-impl<A: ?Sized, B> MatchRule<A, B> {
-    pub fn new(rule: Box<dyn Fn(&A) -> Option<B>>, priority: usize) -> MatchRule<A, B> {
+impl<'a, A: ?Sized, B> MatchRule<'a, A, B> {
+    pub fn new(rule: Box<dyn Fn(&A) -> Option<B>>, priority: usize) -> MatchRule<'a, A, B> {
         MatchRule { rule, priority }
     }
 }
 
-impl<A: ?Sized, B> MatchRuleSet<A, B> {
+impl<'a, A: ?Sized, B> MatchRuleSet<'a, A, B> {
     fn priority_sort(&mut self) {
         self.match_rules
             .sort_by_key(|rule| std::cmp::Reverse(rule.priority));
