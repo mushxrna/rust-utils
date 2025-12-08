@@ -6,29 +6,29 @@ use std::ops::Deref;
 //
 // STRUCTS
 //
-pub struct MatchRule<Item: ?Sized + Deref<Target: Sized>, Result> {
-    pub rule: Box<dyn Fn(&Item::Target) -> Option<Result>>,
+pub struct MatchRule<Item: ?Sized, Result> {
+    pub rule: Box<dyn for<'a> Fn(&'a Item) -> Option<Result>>,
     pub priority: usize,
 }
 
-pub struct MatchRuleSet<Item: ?Sized + Deref<Target: Sized>, Result> {
+pub struct MatchRuleSet<Item: ?Sized + Deref, Result> {
     pub match_rules: Vec<MatchRule<Item, Result>>,
 }
 //
 // IMPL RULE
 //
-impl<A: ?Sized + Deref<Target: Sized>, B> Rule for MatchRule<A, B> {
+impl<A: ?Sized + Deref, B> Rule for MatchRule<A, B> {
     type Item = A;
     type Result = Option<B>;
 
-    fn test(&self, eval: &A::Target) -> Self::Result {
-        (self.rule)(eval.deref())
+    fn test(&self, eval: &A) -> Self::Result {
+        (self.rule)(eval)
     }
 }
 //
 // IMPL RULESET
 //
-impl<A: ?Sized + Deref<Target: Sized>, B> RuleSet for MatchRuleSet<A, B> {
+impl<A: ?Sized + Deref, B> RuleSet for MatchRuleSet<A, B> {
     type Item = A;
     type Result = Option<B>;
 
@@ -46,7 +46,7 @@ impl<A: ?Sized + Deref<Target: Sized>, B> RuleSet for MatchRuleSet<A, B> {
 //
 // IMPL DEFAULT
 //
-impl<A: ?Sized + Deref<Target: Sized>, B> Default for MatchRuleSet<A, B> {
+impl<A: ?Sized + Deref, B> Default for MatchRuleSet<A, B> {
     fn default() -> Self {
         Self {
             match_rules: vec![],
@@ -56,13 +56,13 @@ impl<A: ?Sized + Deref<Target: Sized>, B> Default for MatchRuleSet<A, B> {
 //
 // IMPL METHODS
 //
-impl<A: ?Sized + Deref<Target: Sized>, B> MatchRule<A, B> {
-    pub fn new(rule: Box<dyn Fn(&A::Target) -> Option<B>>, priority: usize) -> MatchRule<A, B> {
+impl<A: ?Sized + Deref, B> MatchRule<A, B> {
+    pub fn new(rule: Box<dyn Fn(&A) -> Option<B>>, priority: usize) -> MatchRule<A, B> {
         MatchRule { rule, priority }
     }
 }
 
-impl<A: ?Sized + Deref<Target: Sized>, B> MatchRuleSet<A, B> {
+impl<A: ?Sized + Deref, B> MatchRuleSet<A, B> {
     fn priority_sort(&mut self) {
         self.match_rules
             .sort_by_key(|rule| std::cmp::Reverse(rule.priority));

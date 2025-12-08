@@ -3,14 +3,14 @@ use std::borrow::Borrow;
 use std::ops::Deref;
 
 pub trait Rule {
-    type Item: ?Sized + Deref<Target: Sized>;
+    type Item: ?Sized;
     type Result;
 
-    fn test(&self, eval: &<Self::Item as Deref>::Target) -> Self::Result;
+    fn test(&self, eval: &Self::Item) -> Self::Result;
 }
 
 pub trait RuleSet: Default {
-    type Item: ?Sized + Deref<Target: Sized>;
+    type Item: ?Sized;
     type Result;
 
     type Rule: Rule<Item = Self::Item, Result = Self::Result>;
