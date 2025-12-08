@@ -6,7 +6,7 @@ use std::borrow::Borrow;
 // STRUCTS
 //
 pub struct MatchRule<Item: ?Sized, Result> {
-    pub rule: Box<dyn Fn(&Item) -> Option<Result>>,
+    pub rule: Box<dyn for<'a> Fn(&'a Item) -> Option<Result>>,
     pub priority: usize,
 }
 
