@@ -1,17 +1,17 @@
 use crate::parsing::rules::*;
 
-pub struct Specifier<T: RuleSet> {
+pub struct Specifier<T> {
     rule_set: T,
 }
 
-impl<T: RuleSet> Specifier<T> {
+impl<T> Specifier<T> {
     pub fn new(ruleset: T) -> Specifier<T> {
         Specifier { rule_set: ruleset }
     }
 
-    pub fn specify<I>(&self, item: &T::Item) -> Option<I>
+    pub fn specify<'a, I>(&self, item: &'a T::Item) -> Option<I>
     where
-        T: RuleSet<Result = MatchRuleResult<I>>,
+        T: RuleSet<'a, Result = MatchRuleResult<I>>,
     {
         self.rule_set
             .test_all(item)
