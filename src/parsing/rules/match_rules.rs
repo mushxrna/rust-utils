@@ -57,7 +57,7 @@ impl<A> From<Option<A>> for MatchRuleResult<A> {
 }
 
 pub struct MatchRule<Item: ?Sized, Result> {
-    pub rule: Box<dyn Fn(&Item) -> MatchRuleResult<Result>>,
+    pub rule: for<'a> fn(&'a Item) -> MatchRuleResult<Result>,
     pub priority: usize,
 }
 
@@ -112,10 +112,7 @@ impl<A> Default for MatchRuleResult<A> {
 // IMPL METHODS
 //
 impl<A: ?Sized, B> MatchRule<A, B> {
-    pub fn new(
-        rule: Box<dyn Fn(&A) -> MatchRuleResult<B>>,
-        priority: usize,
-    ) -> MatchRule<A, B> {
+    pub fn new(rule: for<'a> fn(&'a A) -> MatchRuleResult<B>, priority: usize) -> MatchRule<A, B> {
         MatchRule { rule, priority }
     }
 }
