@@ -62,33 +62,27 @@ impl<A> Default for MatchRuleResult<A> {
     }
 }
 
-pub struct MatchRule<Item: ?Sized, Result, F>
-where
-    F: Fn(&Item) -> MatchRuleResult<Result>,
-{
+pub struct MatchRule<Item: ?Sized, F> {
     pub rule: F,
     pub priority: usize,
-    _marker: std::marker::PhantomData<fn(&Item) -> Result>,
+    _marker: std::marker::PhantomData<fn(&Item)>,
 }
 
-pub struct MatchRuleSet<Item: ?Sized, Result, F>
-where
-    F: Fn(&Item) -> MatchRuleResult<Result>,
-{
-    pub match_rules: Vec<MatchRule<Item, Result, F>>,
+pub struct MatchRuleSet<Item: ?Sized, F> {
+    pub match_rules: Vec<MatchRule<Item, F>>,
 }
 
 //
 // IMPL RULE
 //
-impl<A: ?Sized, B, F> Rule for MatchRule<A, B, F>
+impl<A: ?Sized, R, F> Rule for MatchRule<A, F>
 where
-    F: Fn(&A) -> MatchRuleResult<B>,
+    F: Fn(&A) -> R,
 {
     type Item = A;
-    type Result<'a> = MatchRuleResult<B> where Self: 'a;
+    type Result<'a> = R where Self: 'a;
 
-    fn test<'a>(&'a self, eval: &'a A) -> MatchRuleResult<B> {
+    fn test<'a>(&'a self, eval: &'a A) -> R {
         (self.rule)(eval)
     }
 }
@@ -96,13 +90,13 @@ where
 //
 // IMPL RULESET
 //
-impl<A: ?Sized, B, F> RuleSet for MatchRuleSet<A, B, F>
+impl<A: ?Sized, R, F> RuleSet for MatchRuleSet<A, F>
 where
-    F: Fn(&A) -> MatchRuleResult<B>,
+    F: Fn(&A) -> R,
 {
     type Item = A;
-    type Result<'a> = MatchRuleResult<B> where Self: 'a;
-    type Rule = MatchRule<A, B, F>;
+    type Result<'a> = R where Self: 'a;
+    type Rule = MatchRule<A, F>;
 
     fn get_rules(&self) -> &Vec<Self::Rule> {
         &self.match_rules
@@ -117,10 +111,7 @@ where
 //
 // IMPL DEFAULT
 //
-impl<A: ?Sized, B, F> Default for MatchRuleSet<A, B, F>
-where
-    F: Fn(&A) -> MatchRuleResult<B>,
-{
+impl<A: ?Sized, F> Default for MatchRuleSet<A, F> {
     fn default() -> Self {
         Self {
             match_rules: vec![],
@@ -131,11 +122,8 @@ where
 //
 // IMPL METHODS
 //
-impl<A: ?Sized, B, F> MatchRule<A, B, F>
-where
-    F: Fn(&A) -> MatchRuleResult<B>,
-{
-    pub fn new(rule: F, priority: usize) -> MatchRule<A, B, F> {
+impl<A: ?Sized, F> MatchRule<A, F> {
+    pub fn new(rule: F, priority: usize) -> MatchRule<A, F> {
         MatchRule {
             rule,
             priority,
@@ -144,10 +132,7 @@ where
     }
 }
 
-impl<A: ?Sized, B, F> MatchRuleSet<A, B, F>
-where
-    F: Fn(&A) -> MatchRuleResult<B>,
-{
+impl<A: ?Sized, F> MatchRuleSet<A, F> {
     fn priority_sort(&mut self) {
         self.match_rules
             .sort_by_key(|rule| std::cmp::Reverse(rule.priority));
