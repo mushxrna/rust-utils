@@ -29,13 +29,13 @@ impl<A: Molecule + Clone> Nester<A> {
         while index < source.len() {
             let i = source[index].as_ref();
 
-            if i == &*self.delimiters.0 {
+            if (*self.delimiters.0).eq(&i) {
                 let mut delims_found = 0;
                 let mut dist_to_match = 0;
 
                 for j in source[index..].iter().map(|x| x.as_ref()) {
-                    (j == &*self.delimiters.0).then(|| delims_found += 1);
-                    (j == &*self.delimiters.1).then(|| delims_found -= 1);
+                    (*self.delimiters.0).eq(&j).then(|| delims_found += 1);
+                    (*self.delimiters.1).eq(&j).then(|| delims_found -= 1);
 
                     if delims_found == 0 {
                         break;
@@ -49,7 +49,7 @@ impl<A: Molecule + Clone> Nester<A> {
                     self.nest_into_tree(&source[exc_range.clone()], base + exc_range.start);
                 node_pool.push(evaluated_node);
                 index += dist_to_match;
-            } else if i != &*self.delimiters.1 {
+            } else if !(*self.delimiters.1).eq(&i) {
                 node_pool.push(IndexNode::new(Some(base + index), None));
             }
 
