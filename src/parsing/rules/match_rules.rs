@@ -73,29 +73,38 @@ pub struct MatchRuleSet<Item: ?Sized, F> {
 }
 
 //
+// TRAIT FOR CALLABLE
+//
+pub trait MatchFn<Item: ?Sized> {
+    type Output<'a> where Item: 'a;
+    fn call<'a>(&self, input: &'a Item) -> Self::Output<'a>;
+}
+
+impl<A: ?Sized, R, F: Fn(&A) -> R> MatchFn<A> for F {
+    type Output<'a> = R where A: 'a;
+    fn call<'a>(&self, input: &'a A) -> R {
+        self(input)
+    }
+}
+
+//
 // IMPL RULE
 //
-impl<A: ?Sized, R, F> Rule for MatchRule<A, F>
-where
-    F: Fn(&A) -> R,
-{
+impl<A: ?Sized, F: MatchFn<A>> Rule for MatchRule<A, F> {
     type Item = A;
-    type Result<'a> = R where Self: 'a;
+    type Result<'a> = F::Output<'a> where Self: 'a;
 
-    fn test<'a>(&'a self, eval: &'a A) -> R {
-        (self.rule)(eval)
+    fn test<'a>(&'a self, eval: &'a A) -> F::Output<'a> {
+        self.rule.call(eval)
     }
 }
 
 //
 // IMPL RULESET
 //
-impl<A: ?Sized, R, F> RuleSet for MatchRuleSet<A, F>
-where
-    F: Fn(&A) -> R,
-{
+impl<A: ?Sized, F: MatchFn<A>> RuleSet for MatchRuleSet<A, F> {
     type Item = A;
-    type Result<'a> = R where Self: 'a;
+    type Result<'a> = F::Output<'a> where Self: 'a;
     type Rule = MatchRule<A, F>;
 
     fn get_rules(&self) -> &Vec<Self::Rule> {
