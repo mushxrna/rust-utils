@@ -22,20 +22,20 @@ impl<A: Molecule + Clone> Nester<A> {
     pub fn new(delimiters: (A, A)) -> Nester<A> {
         Nester { delimiters }
     }
-    pub fn nest_into_tree(&self, source: &[impl AsRef<[A::Atom]>], base: usize) -> IndexNode<A> {
+    pub fn nest_into_tree(&self, source: &[A], base: usize) -> IndexNode<A> {
         let mut index = 0;
         let mut node_pool = vec![];
 
         while index < source.len() {
-            let i = source[index].as_ref();
+            let i = source[index].deref();
 
-            if (*self.delimiters.0).eq(&i) {
+            if &*self.delimiters.0 == i {
                 let mut delims_found = 0;
                 let mut dist_to_match = 0;
 
-                for j in source[index..].iter().map(|x| x.as_ref()) {
-                    (*self.delimiters.0).eq(&j).then(|| delims_found += 1);
-                    (*self.delimiters.1).eq(&j).then(|| delims_found -= 1);
+                for j in source[index..].iter().map(|x| x.deref()) {
+                    (&*self.delimiters.0 == j).then(|| delims_found += 1);
+                    (&*self.delimiters.1 == j).then(|| delims_found -= 1);
 
                     if delims_found == 0 {
                         break;

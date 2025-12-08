@@ -1,5 +1,5 @@
 use std::ops::Deref;
 
-pub trait Molecule: Deref<Target: for<'a> PartialEq<&'a [Self::Atom]>> {
+pub trait Molecule: Deref<Target: for<'a> PartialEq> {
     type Atom: PartialEq;
 }
