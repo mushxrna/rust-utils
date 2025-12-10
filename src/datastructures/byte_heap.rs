@@ -63,6 +63,11 @@ impl<const S: usize> ByteHeap<S> {
         Ok(index)
     }
 
+    pub fn retrieve(&self, range: std::ops::Range<usize>) -> &[u8] {
+        let extraction_region = &self.bytes[range];
+        extraction_region
+    }
+
     pub fn new() -> ByteHeap<S> {
         ByteHeap {
             bytes: Box::new([0; S]),
