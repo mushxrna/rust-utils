@@ -30,13 +30,11 @@ impl<const S: usize> ByteHeap<S> {
         let mut consecutive = 0;
         let mut start = 0;
 
-        for (i) in 0..self.bytes.len() {
-            if !flag_check!(self.allocation_flags[i], MANAGED_FLAG) {
-                consecutive += 1;
-            }
-
+        for i in 0..self.bytes.len() {
             if flag_check!(self.allocation_flags[i], MANAGED_FLAG) {
                 consecutive = 0;
+            } else {
+                consecutive += 1;
             }
 
             if consecutive == space_in_bytes {
