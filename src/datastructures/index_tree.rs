@@ -33,7 +33,7 @@ impl NodeData {
     }
 }
 
-impl<A: Clone> IndexNode<A> {
+impl<A> IndexNode<A> {
     //------------------------------------------------------------------------------------------
     fn data(&self) -> &NodeData {
         match self {
@@ -73,7 +73,7 @@ impl<A: Clone> IndexNode<A> {
         IndexNode::NotAssociated(NodeData { index, children: c })
     }
 
-    pub fn associate(self, source: &[A]) -> Result<IndexNode<A>, IndexNodeError> {
+    pub fn associate<B: Clone>(self, source: &[B]) -> Result<IndexNode<B>, IndexNodeError> {
         let i = self.index().ok_or(IndexNodeError::CouldNotAssociateError)?;
         let val = &source[i];
 
