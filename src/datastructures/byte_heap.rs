@@ -59,10 +59,10 @@ impl<const S: usize> ByteHeap<S> {
         Ok(10)
     }
 
-    pub fn new<const SIZE: usize>() -> ByteHeap<SIZE> {
+    pub fn new() -> ByteHeap<S> {
         ByteHeap {
-            bytes: Box::new([0; SIZE]),
-            allocation_flags: Box::new([0; SIZE]),
+            bytes: Box::new([0; S]),
+            allocation_flags: Box::new([0; S]),
         }
     }
 }
