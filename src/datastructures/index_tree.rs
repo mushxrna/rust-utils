@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::{fmt::Debug, ops::Deref};
 
 use thiserror::Error;
 
@@ -85,5 +85,21 @@ impl<A: Clone> IndexNode<A> {
             }
             IndexNode::NotAssociated(d) => Err(IndexNodeError::NoAssociationError),
         }
+    }
+}
+
+impl<A: Clone + Debug> std::fmt::Debug for IndexNode<A> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        f.debug_struct("IndexNode")
+            .field("Associated: {}", &self.is_associated())
+            .field(
+                "Associated Item: {}",
+                &(self.is_associated())
+                    .then(|| -> String { format!("{:?}", self.associated().unwrap()) })
+                    .unwrap_or_else(|| -> String { String::from("N/A") }),
+            )
+            .field("Children: {}", &self.children().iter().len());
+
+        Ok(())
     }
 }
