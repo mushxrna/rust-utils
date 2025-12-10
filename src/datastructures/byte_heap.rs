@@ -56,7 +56,12 @@ impl<const S: usize> ByteHeap<S> {
             .get_mut(index..index + bytes.len())
             .ok_or(E::InsertError)?;
 
-        Ok(10)
+        for (x, i) in insertion_region.iter_mut().enumerate() {
+            *i = bytes[x];
+            self.allocation_flags[x] = 0b1000_0000
+        }
+
+        Ok(index)
     }
 
     pub fn new() -> ByteHeap<S> {
