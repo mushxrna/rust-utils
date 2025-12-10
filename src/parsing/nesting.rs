@@ -75,11 +75,3 @@ impl<T: std::fmt::Display> std::fmt::Display for NestedObject<T> {
         }
     }
 }
-impl<A: Clone> std::fmt::Display for IndexNode<A> {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        match self.children() {
-            Some(c) => write!(f, "Parent Node! Owner of {} nodes.", c.len()),
-            None => write!(f, "Child Node!"),
-        }
-    }
-}
