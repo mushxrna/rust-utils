@@ -98,7 +98,8 @@ impl<A: Clone + Debug> std::fmt::Debug for IndexNode<A> {
                     .then(|| -> String { format!("{:?}", self.associated().unwrap()) })
                     .unwrap_or_else(|| -> String { String::from("N/A") }),
             )
-            .field("Children: {}", &self.children().iter().len());
+            .field("Children: {}", &self.children().iter().len())
+            .finish();
 
         Ok(())
     }
