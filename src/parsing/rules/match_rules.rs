@@ -1,11 +1,19 @@
-use crate::parsing::rules::{Rule, RuleSet};
-
+use crate::parsing::rules::{Rule, RuleSet, TypeConstructor};
 //
 // STRUCTS
 //
 pub enum MatchRuleResult<A> {
     Match(A),
     NoMatch,
+}
+
+pub struct MatchRule<Item: ?Sized, TC: TypeConstructor> {
+    pub rule: for<'a> fn(&'a Item) -> MatchRuleResult<TC::Of<'a>>,
+    pub priority: usize,
+}
+
+pub struct MatchRuleSet<Item: ?Sized, TC: TypeConstructor> {
+    pub match_rules: Vec<MatchRule<Item, TC>>,
 }
 
 //
@@ -62,26 +70,15 @@ impl<A> Default for MatchRuleResult<A> {
     }
 }
 
-/// A type constructor - implement this to specify what type is produced for each lifetime
-pub trait TypeCtor {
-    type Of<'a>;
-}
-
-pub struct MatchRule<Item: ?Sized, R: TypeCtor> {
-    pub rule: for<'a> fn(&'a Item) -> MatchRuleResult<R::Of<'a>>,
-    pub priority: usize,
-}
-
-pub struct MatchRuleSet<Item: ?Sized, R: TypeCtor> {
-    pub match_rules: Vec<MatchRule<Item, R>>,
-}
-
 //
 // IMPL RULE
 //
-impl<A: ?Sized, R: TypeCtor> Rule for MatchRule<A, R> {
+impl<A: ?Sized, R: TypeConstructor> Rule for MatchRule<A, R> {
     type Item = A;
-    type Result<'a> = MatchRuleResult<R::Of<'a>> where Self: 'a;
+    type Result<'a>
+        = MatchRuleResult<R::Of<'a>>
+    where
+        Self: 'a;
 
     fn test<'a>(&'a self, eval: &'a A) -> MatchRuleResult<R::Of<'a>> {
         (self.rule)(eval)
@@ -91,9 +88,12 @@ impl<A: ?Sized, R: TypeCtor> Rule for MatchRule<A, R> {
 //
 // IMPL RULESET
 //
-impl<A: ?Sized, R: TypeCtor> RuleSet for MatchRuleSet<A, R> {
+impl<A: ?Sized, R: TypeConstructor> RuleSet for MatchRuleSet<A, R> {
     type Item = A;
-    type Result<'a> = MatchRuleResult<R::Of<'a>> where Self: 'a;
+    type Result<'a>
+        = MatchRuleResult<R::Of<'a>>
+    where
+        Self: 'a;
     type Rule = MatchRule<A, R>;
 
     fn get_rules(&self) -> &Vec<Self::Rule> {
@@ -109,7 +109,7 @@ impl<A: ?Sized, R: TypeCtor> RuleSet for MatchRuleSet<A, R> {
 //
 // IMPL DEFAULT
 //
-impl<A: ?Sized, R: TypeCtor> Default for MatchRuleSet<A, R> {
+impl<A: ?Sized, R: TypeConstructor> Default for MatchRuleSet<A, R> {
     fn default() -> Self {
         Self {
             match_rules: vec![],
@@ -120,13 +120,13 @@ impl<A: ?Sized, R: TypeCtor> Default for MatchRuleSet<A, R> {
 //
 // IMPL METHODS
 //
-impl<A: ?Sized, R: TypeCtor> MatchRule<A, R> {
+impl<A: ?Sized, R: TypeConstructor> MatchRule<A, R> {
     pub fn new(rule: for<'a> fn(&'a A) -> MatchRuleResult<R::Of<'a>>, priority: usize) -> Self {
         MatchRule { rule, priority }
     }
 }
 
-impl<A: ?Sized, R: TypeCtor> MatchRuleSet<A, R> {
+impl<A: ?Sized, R: TypeConstructor> MatchRuleSet<A, R> {
     fn priority_sort(&mut self) {
         self.match_rules
             .sort_by_key(|rule| std::cmp::Reverse(rule.priority));
