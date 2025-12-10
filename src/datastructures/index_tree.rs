@@ -8,10 +8,12 @@ pub enum IndexNodeError {
     AssociationError,
     #[error("No associated item on node.")]
     NoAssociationError,
+    #[error("Could not associate node.")]
+    CouldNotAssociateError,
 }
 
 pub enum IndexNode<A> {
-    Associated(NodeData, Option<A>),
+    Associated(NodeData, A),
     NotAssociated(NodeData),
 }
 
@@ -71,18 +73,17 @@ impl<A: Clone> IndexNode<A> {
         IndexNode::NotAssociated(NodeData { index, children: c })
     }
 
-    pub fn associate(self, source: &[A]) -> IndexNode<A> {
-        let val = (self.index().is_some()).then(|| source[self.index().unwrap()].clone());
+    pub fn associate(self, source: &[A]) -> Result<IndexNode<A>, IndexNodeError> {
+        let i = self.index().ok_or(IndexNodeError::CouldNotAssociateError)?;
+        let val = &source[i];
 
-        IndexNode::Associated(self.into_data(), val)
+        Ok(IndexNode::Associated(self.into_data(), val.clone()))
     }
     //------------------------------------------------------------------------------------------
 
     pub fn associated(&self) -> Result<&A, IndexNodeError> {
         match self {
-            IndexNode::Associated(data, assoc) => {
-                assoc.as_ref().ok_or(IndexNodeError::AssociationError)
-            }
+            IndexNode::Associated(data, assoc) => Ok(assoc),
             IndexNode::NotAssociated(d) => Err(IndexNodeError::NoAssociationError),
         }
     }
