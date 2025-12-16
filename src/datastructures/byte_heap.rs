@@ -1,3 +1,5 @@
+use std::{marker::PhantomData, mem};
+
 use thiserror::Error;
 
 use crate::generics::Byteable;
@@ -20,9 +22,20 @@ pub enum ByteHeapError {
 
 use ByteHeapError as E;
 
+pub struct Accessor<'a, T> {
+    value: &'a [u8],
+    _p: PhantomData<T>,
+}
+
 pub struct ByteHeap<const SIZE: usize> {
     bytes: Box<[u8; SIZE]>,
     allocation_flags: Box<[u8; SIZE]>,
+}
+
+impl<A: Byteable + bytemuck::Pod> Accessor<'_, A> {
+    pub fn retrieve<'a>(&'a self) -> &'a [A] {
+        bytemuck::cast_slice(self.value)
+    }
 }
 
 impl<const S: usize> ByteHeap<S> {
@@ -61,6 +74,18 @@ impl<const S: usize> ByteHeap<S> {
         }
 
         Ok(index)
+    }
+
+    pub fn insert_accessor<'a, A: Byteable>(&'a mut self, item: A) -> Result<Accessor<'a, A>, E> {
+        let i = self.insert(item)?;
+        let l = mem::size_of::<A>();
+
+        let r = self.retrieve(i..l);
+
+        Ok(Accessor {
+            value: r,
+            _p: PhantomData,
+        })
     }
 
     pub fn retrieve(&self, range: std::ops::Range<usize>) -> &[u8] {
