@@ -7,6 +7,12 @@ macro_rules! bmask {
         BitMask::from(String::from($bin))
     };
 }
+#[macro_export]
+macro_rules! flag_check {
+    ($flag:expr, $item:expr) => {
+        ($item.first_mask_byte() & $flag == $flag)
+    };
+}
 
 #[derive(Debug)]
 pub struct BitMask<const BLEN: usize> {

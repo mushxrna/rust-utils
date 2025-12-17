@@ -2,18 +2,9 @@ use std::{marker::PhantomData, mem};
 
 use thiserror::Error;
 
-use crate::{bmask, datastructures::BitMask, generics::Byteable};
+use crate::{bmask, datastructures::BitMask, flag_check, generics::Byteable};
 
 const MANAGED_FLAG: u8 = 0b1000_0000;
-
-//
-//      MACROS
-//
-macro_rules! flag_check {
-    ($flag:expr, $item:expr) => {
-        ($item.first_mask_byte() & $flag == $flag)
-    };
-}
 //
 //      ERRORS
 //
