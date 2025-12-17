@@ -14,7 +14,7 @@ use ByteMapError as E;
 //
 //      STRUCTS
 //
-struct ByteMap<const BYTELEN: usize, V> {
+pub struct ByteMap<const BYTELEN: usize, V> {
     map: HashMap<[u8; BYTELEN], V>,
     capacity: usize, //2^(BYTELEN * 8) - 1
     occupied_keys: usize,
