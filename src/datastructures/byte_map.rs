@@ -52,7 +52,7 @@ impl<const BYTELEN: usize, V> ByteMap<BYTELEN, V> {
     //      CONSTRUCTOR
     //
     pub fn new() -> Self {
-        let cap = (2 as usize).pow(BYTELEN as u32) - 1;
+        let cap = (2 as usize).pow(BYTELEN as u32 * 8) - 1;
         Self {
             map: HashMap::new(),
             capacity: cap,
