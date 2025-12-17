@@ -2,7 +2,7 @@ use std::{marker::PhantomData, mem};
 
 use thiserror::Error;
 
-use crate::generics::Byteable;
+use crate::{datastructures::BitMask, generics::Byteable};
 
 const MANAGED_FLAG: u8 = 0b1000_0000;
 
@@ -11,7 +11,7 @@ const MANAGED_FLAG: u8 = 0b1000_0000;
 //
 macro_rules! flag_check {
     ($flag:expr, $item:expr) => {
-        ($item & $flag == $flag)
+        ($item.first_mask_byte() & $flag == $flag)
     };
 }
 //
@@ -35,7 +35,7 @@ pub struct Accessor<'a, T> {
 
 pub struct ByteHeap<const SIZE: usize> {
     bytes: Box<[u8; SIZE]>,
-    allocation_flags: Box<[u8; SIZE]>,
+    allocation_flags: Box<[BitMask<1>; SIZE]>,
 }
 //
 //      STRUCT IMPLS
@@ -84,7 +84,7 @@ impl<const S: usize> ByteHeap<S> {
 
         for (x, i) in insertion_region.iter_mut().enumerate() {
             *i = bytes[x];
-            self.allocation_flags[x] = 0b1000_0000
+            self.allocation_flags[x] = BitMask::from(String::from("10000000"))
         }
 
         Ok(index)
@@ -111,9 +111,15 @@ impl<const S: usize> ByteHeap<S> {
     //      CONSTRUCTOR
     //
     pub fn new() -> ByteHeap<S> {
+        let mut masks = vec![];
+
+        for i in 0..S {
+            masks[i] = BitMask::from(String::from("00000000"));
+        }
+
         ByteHeap {
             bytes: Box::new([0; S]),
-            allocation_flags: Box::new([0; S]),
+            allocation_flags: Box::new(masks.try_into().unwrap()),
         }
     }
 }

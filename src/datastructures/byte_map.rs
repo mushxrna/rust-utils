@@ -20,6 +20,15 @@ pub struct ByteMap<const BYTELEN: usize, V> {
     occupied_keys: usize,
 }
 
+pub struct MaskedByteMap<const BYTELEN: usize, V> {
+    map: HashMap<[u8; BYTELEN], V>,
+    capacity: usize,
+    occupied_keys: usize,
+    exclude_mask: [u8; BYTELEN],
+}
+//
+//      STRUCT IMPLS
+//
 impl<const BYTELEN: usize, V> ByteMap<BYTELEN, V> {
     //
     //      PRIVATE
