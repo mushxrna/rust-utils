@@ -1,8 +1,11 @@
 //
 //      MACROS
 //
+#[macro_export]
 macro_rules! bmask {
-    ($bin:expr) => {};
+    ($bin:expr) => {
+        BitMask::from(String::from($bin))
+    };
 }
 
 #[derive(Debug)]

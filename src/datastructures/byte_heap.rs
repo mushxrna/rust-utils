@@ -2,7 +2,7 @@ use std::{marker::PhantomData, mem};
 
 use thiserror::Error;
 
-use crate::{datastructures::BitMask, generics::Byteable};
+use crate::{bmask, datastructures::BitMask, generics::Byteable};
 
 const MANAGED_FLAG: u8 = 0b1000_0000;
 
@@ -84,7 +84,7 @@ impl<const S: usize> ByteHeap<S> {
 
         for (x, i) in insertion_region.iter_mut().enumerate() {
             *i = bytes[x];
-            self.allocation_flags[x] = BitMask::from(String::from("10000000"))
+            self.allocation_flags[x] = bmask!("10000000")
         }
 
         Ok(index)
@@ -114,7 +114,7 @@ impl<const S: usize> ByteHeap<S> {
         let mut masks = vec![];
 
         for i in 0..S {
-            masks[i] = BitMask::from(String::from("00000000"));
+            masks[i] = bmask!("00000000");
         }
 
         ByteHeap {
