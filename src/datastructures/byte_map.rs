@@ -27,9 +27,10 @@ impl<const BYTELEN: usize, V> ByteMap<BYTELEN, V> {
     fn generate_key(&self) -> Result<[u8; BYTELEN], E> {
         if self.occupied_keys < self.capacity {
             let key = self.occupied_keys + 1;
-            let key_b = &usize::to_ne_bytes(key)[0..BYTELEN];
-            let z: [u8; BYTELEN] = bytemuck::try_cast(key).map_err(|z| E::CastError)?;
-            Ok(z)
+            let key_b: [u8; BYTELEN] = usize::to_ne_bytes(key)[0..BYTELEN]
+                .try_into()
+                .map_err(|z| E::CastError)?;
+            Ok(key_b)
         } else {
             Err(E::MaxCapacityError)
         }
