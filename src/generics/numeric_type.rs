@@ -80,3 +80,11 @@ impl NumericType for u64 {
         value as Self
     }
 }
+impl NumericType for usize {
+    fn to_f32(self) -> f32 {
+        self as f32
+    }
+    fn from_f32(value: f32) -> Self {
+        value as Self
+    }
+}
