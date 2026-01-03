@@ -1,43 +1,64 @@
-use crate::graphics::vectors::Vec2;
+use wgpu::Adapter;
+
+use crate::graphics::wgpu_helpers::common::*;
+
+use std::sync::Arc;
 
 pub struct WgpuContextManager {
-    pub device: wgpu::Device,
-    pub queue: wgpu::Queue,
-    pub config: Option<wgpu::SurfaceConfiguration>,
-    pub surface: Option<wgpu::Surface<'static>>,
-    pub surface_format: Option<wgpu::TextureFormat>,
-    pub configured: bool,
+    device: Device,
+    queue: Queue,
+    config: SurfaceConfiguration,
+    surface: Surface<'static>,
 }
 
 impl WgpuContextManager {
-    pub async fn new(
-        size: Vec2<u32>,
-        window: Option<std::sync::Arc<winit::window::Window>>,
-    ) -> Self {
-        let instance = {
-            wgpu::Instance::new(&wgpu::InstanceDescriptor {
-                backends: wgpu::Backends::PRIMARY,
-                ..Default::default()
-            })
-        };
+    //----------------------------------------------------------- private utility
+    fn primary_backend_instance() -> Instance {
+        Instance::new(&wgpu::InstanceDescriptor {
+            backends: wgpu::Backends::PRIMARY,
+            ..Default::default()
+        })
+    }
 
-        let surface = match window {
-            Some(_window) => Some(instance.create_surface(_window).unwrap()),
-            None => None,
-        };
-
-        let adapter = instance
+    async fn highperformance_adapter(
+        instance: &Instance,
+        surface: Option<&Surface<'static>>,
+    ) -> Result<Adapter, WpguContextError> {
+        Ok(instance
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::HighPerformance,
-                compatible_surface: match &surface {
-                    Some(surface) => Some(&surface),
-                    None => None,
-                },
+                compatible_surface: surface,
                 force_fallback_adapter: false,
             })
-            .await
-            .unwrap();
+            .await?)
+    }
 
+    fn configure_surface(
+        surface: &Surface,
+        adapter: &Adapter,
+        size: (u32, u32),
+    ) -> SurfaceConfiguration {
+        let surface_caps = surface.get_capabilities(&adapter);
+        let surface_format = surface_caps
+            .formats
+            .iter()
+            .find(|f| f.is_srgb())
+            .copied()
+            .unwrap_or(surface_caps.formats[0]);
+
+        wgpu::SurfaceConfiguration {
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            format: surface_format,
+            width: size.0,
+            height: size.1,
+            present_mode: surface_caps.present_modes[0],
+            alpha_mode: surface_caps.alpha_modes[0],
+            view_formats: vec![],
+            desired_maximum_frame_latency: 2,
+        }
+    }
+
+    async fn default_device(adapter: &Adapter) -> Result<(Device, Queue), WpguContextError> {
         let (device, queue) = adapter
             .request_device(&wgpu::DeviceDescriptor {
                 label: None,
@@ -49,45 +70,29 @@ impl WgpuContextManager {
                 trace: wgpu::Trace::Off,
                 experimental_features: wgpu::ExperimentalFeatures::disabled(),
             })
-            .await
-            .unwrap();
+            .await?;
 
-        let mut surface_format = None;
+        Ok((device, queue))
+    }
+    //----------------------------------------------------------- accessors
+    pub fn device(&self) -> &Device {
+        &self.device
+    }
+    //----------------------------------------------------------- various constructors
+    pub async fn new_with_winit(
+        size: (u32, u32),
+        window: Arc<winit::window::Window>,
+    ) -> Result<Self, WpguContextError> {
+        let instance = Self::primary_backend_instance();
+        let surface = instance.create_surface(window)?;
+        let adapter = Self::highperformance_adapter(&instance, Some(&surface)).await?;
+        let (device, queue) = Self::default_device(&adapter).await?;
 
-        let config = match &surface {
-            Some(_surface) => {
-                let surface_caps = surface.as_ref().unwrap().get_capabilities(&adapter);
-                surface_format = Some(
-                    surface_caps
-                        .formats
-                        .iter()
-                        .find(|f| f.is_srgb())
-                        .copied()
-                        .unwrap_or(surface_caps.formats[0]),
-                );
-
-                let config = wgpu::SurfaceConfiguration {
-                    usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-                    format: surface_format.unwrap(),
-                    width: size.x,
-                    height: size.y,
-                    present_mode: surface_caps.present_modes[0],
-                    alpha_mode: surface_caps.alpha_modes[0],
-                    view_formats: vec![],
-                    desired_maximum_frame_latency: 2,
-                };
-                Some(config)
-            }
-            None => None,
-        };
-        println!("context created.");
-        Self {
+        Ok(Self {
             device,
             queue,
-            config,
+            config: Self::configure_surface(&surface, &adapter, size),
             surface,
-            surface_format,
-            configured: false,
-        }
+        })
     }
 }

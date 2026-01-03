@@ -11,6 +11,8 @@ pub enum ByteMapError {
     CastError,
 }
 use ByteMapError as E;
+
+use crate::datastructures::BitMask;
 //
 //      STRUCTS
 //
@@ -24,7 +26,7 @@ pub struct MaskedByteMap<const BYTELEN: usize, V> {
     map: HashMap<[u8; BYTELEN], V>,
     capacity: usize,
     occupied_keys: usize,
-    exclude_mask: [u8; BYTELEN],
+    exclude_mask: BitMask<BYTELEN>,
 }
 //
 //      STRUCT IMPLS
