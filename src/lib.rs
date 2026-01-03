@@ -1,5 +1,6 @@
 #![allow(unused)]
 
+#[cfg(feature = "graphics")]
 pub mod graphics;
 
 pub mod datastructures;
