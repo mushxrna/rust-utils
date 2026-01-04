@@ -36,8 +36,8 @@ impl RenderPipelineManager {
                 primitive: Default::default(),
                 depth_stencil: None,
                 multisample: Default::default(),
-                multiview: None,
                 cache: None,
+                multiview_mask: None,
             });
 
         Self { pipe }
