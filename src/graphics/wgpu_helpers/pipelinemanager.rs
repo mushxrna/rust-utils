@@ -6,6 +6,10 @@ pub struct RenderPipelineManager {
 }
 
 impl RenderPipelineManager {
+    pub fn pipe(&self) -> &RenderPipeline {
+        &self.pipe
+    }
+
     pub fn new(ctx: &WgpuContextManager, shader_src: &str) -> Self {
         let shader = ctx.device().create_shader_module(ShaderModuleDescriptor {
             label: None,
