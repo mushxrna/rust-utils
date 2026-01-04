@@ -42,4 +42,42 @@ impl RenderPipelineManager {
 
         Self { pipe }
     }
+
+    pub fn render_pass(&self, ctx: &WgpuContextManager) {
+        let surface = ctx
+            .surface()
+            .get_current_texture()
+            .expect("Couldn't get surface texture!");
+        let view = surface
+            .texture
+            .create_view(&wgpu::TextureViewDescriptor::default());
+
+        let mut encoder = ctx
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+
+        {
+            let mut r_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: None,
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: &view,
+                    depth_slice: None,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::GREEN),
+                        store: wgpu::StoreOp::Store,
+                    },
+                })],
+                depth_stencil_attachment: None,
+                timestamp_writes: None,
+                occlusion_query_set: None,
+                multiview_mask: None,
+            });
+            r_pass.set_pipeline(self.pipe());
+            r_pass.draw(0..3, 0..1);
+        }
+
+        ctx.queue().submit(Some(encoder.finish()));
+        surface.present();
+    }
 }
