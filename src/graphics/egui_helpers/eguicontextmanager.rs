@@ -1,5 +1,7 @@
 use crate::graphics::egui_helpers::common::*;
 
+pub type GuiFn = fn(&Context);
+
 pub struct EguiContextManager {
     state: State,
     renderer: Renderer,
@@ -28,12 +30,7 @@ impl EguiContextManager {
     }
     //----------------------------------------------------------- render pass
 
-    pub fn render_pass<F: Fn(&Context)>(
-        &mut self,
-        wgpu_ctx: &WgpuContextManager,
-        window: Arc<Window>,
-        f: F,
-    ) {
+    pub fn render_pass(&mut self, wgpu_ctx: &WgpuContextManager, window: Arc<Window>, f: GuiFn) {
         let input = self.state.take_egui_input(&window);
         let full_output = self.state.egui_ctx().run(input, f);
 

@@ -13,3 +13,4 @@ pub mod common {
 }
 
 pub use eguicontextmanager::EguiContextManager;
+pub use eguicontextmanager::GuiFn;
