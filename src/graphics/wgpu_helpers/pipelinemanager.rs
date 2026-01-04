@@ -6,7 +6,7 @@ pub struct RenderPipelineManager {
 }
 
 impl RenderPipelineManager {
-    pub fn new(ctx: WgpuContextManager, shader_src: &str) -> Self {
+    pub fn new(ctx: &WgpuContextManager, shader_src: &str) -> Self {
         let shader = ctx.device().create_shader_module(ShaderModuleDescriptor {
             label: None,
             source: ShaderSource::Wgsl(Cow::Borrowed(shader_src)),
