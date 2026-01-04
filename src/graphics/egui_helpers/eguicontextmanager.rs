@@ -1,12 +1,11 @@
 use crate::graphics::egui_helpers::common::*;
 
-pub struct EguiContextManager<'a> {
+pub struct EguiContextManager {
     state: State,
     renderer: Renderer,
-    gui_fn: Option<Box<dyn Fn(&Context) + 'a>>,
 }
 
-impl<'a> EguiContextManager<'a> {
+impl EguiContextManager {
     //----------------------------------------------------------- accessors
     pub fn state(&mut self) -> &mut State {
         &mut self.state
@@ -32,25 +31,19 @@ impl<'a> EguiContextManager<'a> {
             egui_wgpu::RendererOptions::default(),
         );
 
-        Self {
-            state,
-            renderer,
-            gui_fn: None,
-        }
+        Self { state, renderer }
     }
 
     //----------------------------------------------------------- public utilities
-    pub fn set_gui_fn<F: Fn(&Context) + 'a>(&mut self, f: F) {
-        self.gui_fn = Some(Box::new(f));
-    }
-
     //----------------------------------------------------------- render pass
-    pub fn render_pass(&mut self, wgpu_ctx: &WgpuContextManager, window: Arc<Window>) {
+    pub fn render_pass<F: Fn(&Context)>(
+        &mut self,
+        wgpu_ctx: &WgpuContextManager,
+        window: Arc<Window>,
+        f: &F,
+    ) {
         let input = self.state.take_egui_input(&window);
-        let full_output = self
-            .state
-            .egui_ctx()
-            .run(input, self.gui_fn.as_ref().unwrap());
+        let full_output = self.state.egui_ctx().run(input, f);
 
         self.state
             .handle_platform_output(&window, full_output.platform_output);
