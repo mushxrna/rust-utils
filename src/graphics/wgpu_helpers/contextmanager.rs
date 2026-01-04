@@ -85,8 +85,8 @@ impl WgpuContextManager {
         &self.surface
     }
 
-    pub fn format(&self) -> &TextureFormat {
-        &self.config.format
+    pub fn format(&self) -> TextureFormat {
+        self.config.format
     }
 
     pub fn size(&self) -> (u32, u32) {
