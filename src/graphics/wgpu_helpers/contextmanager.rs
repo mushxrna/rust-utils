@@ -1,7 +1,5 @@
-use wgpu::Adapter;
-
 use crate::graphics::wgpu_helpers::common::*;
-
+use pollster::block_on;
 use std::sync::Arc;
 
 pub struct WgpuContextManager {
@@ -38,7 +36,7 @@ impl WgpuContextManager {
         adapter: &Adapter,
         size: (u32, u32),
     ) -> SurfaceConfiguration {
-        let surface_caps = surface.get_capabilities(&adapter);
+        let surface_caps = surface.get_capabilities(adapter);
         let surface_format = surface_caps
             .formats
             .iter()
@@ -78,21 +76,34 @@ impl WgpuContextManager {
     pub fn device(&self) -> &Device {
         &self.device
     }
+
+    pub fn surface(&self) -> &Surface {
+        &self.surface
+    }
     //----------------------------------------------------------- various constructors
     pub async fn new_with_winit(
-        size: (u32, u32),
         window: Arc<winit::window::Window>,
     ) -> Result<Self, WpguContextError> {
+        let size = (window.inner_size().width, window.inner_size().height);
+
         let instance = Self::primary_backend_instance();
         let surface = instance.create_surface(window)?;
         let adapter = Self::highperformance_adapter(&instance, Some(&surface)).await?;
         let (device, queue) = Self::default_device(&adapter).await?;
+        let config = Self::configure_surface(&surface, &adapter, size);
 
+        surface.configure(&device, &config);
         Ok(Self {
             device,
             queue,
-            config: Self::configure_surface(&surface, &adapter, size),
+            config,
             surface,
         })
+    }
+
+    pub fn blocking_with_winit(
+        window: Arc<winit::window::Window>,
+    ) -> Result<Self, WpguContextError> {
+        block_on(Self::new_with_winit(window))
     }
 }

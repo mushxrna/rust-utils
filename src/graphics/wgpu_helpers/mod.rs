@@ -1,7 +1,7 @@
 pub mod common {
     pub use crate::graphics::wgpu_helpers::errors::*;
     pub use wgpu::{
-        Device, Instance, Queue, Surface, SurfaceConfiguration, Texture, TextureFormat,
+        Adapter, Device, Instance, Queue, Surface, SurfaceConfiguration, Texture, TextureFormat,
     };
 }
 
