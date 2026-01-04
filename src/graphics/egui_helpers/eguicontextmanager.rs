@@ -1,6 +1,6 @@
 use crate::graphics::egui_helpers::common::*;
 
-pub type GuiFn = fn(&Context);
+pub type GuiFn = Box<dyn Fn(&Context)>;
 
 pub struct EguiContextManager {
     state: State,
