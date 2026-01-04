@@ -92,6 +92,10 @@ impl WgpuContextManager {
     pub fn size(&self) -> (u32, u32) {
         (self.config.width, self.config.height)
     }
+
+    pub fn config(&self) -> SurfaceConfiguration {
+        self.config.clone()
+    }
     //----------------------------------------------------------- various constructors
     pub async fn new_with_winit(
         window: Arc<winit::window::Window>,
