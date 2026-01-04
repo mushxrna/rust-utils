@@ -37,7 +37,7 @@ impl RenderPipelineManager {
                 depth_stencil: None,
                 multisample: Default::default(),
                 cache: None,
-                multiview_mask: None,
+                multiview: None,
             });
 
         Self { pipe }
@@ -71,7 +71,6 @@ impl RenderPipelineManager {
                 depth_stencil_attachment: None,
                 timestamp_writes: None,
                 occlusion_query_set: None,
-                multiview_mask: None,
             });
             r_pass.set_pipeline(self.pipe());
             r_pass.draw(0..3, 0..1);
