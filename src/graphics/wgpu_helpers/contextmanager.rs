@@ -72,6 +72,12 @@ impl WgpuContextManager {
 
         Ok((device, queue))
     }
+
+    //----------------------------------------------------------- public utility
+    pub fn reconfigure_surface(&mut self, config: SurfaceConfiguration) {
+        self.surface.configure(&self.device, &config);
+        self.config = config;
+    }
     //----------------------------------------------------------- accessors
     pub fn device(&self) -> &Device {
         &self.device
