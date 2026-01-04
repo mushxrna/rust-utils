@@ -77,6 +77,10 @@ impl WgpuContextManager {
         &self.device
     }
 
+    pub fn queue(&self) -> &Queue {
+        &self.queue
+    }
+
     pub fn surface(&self) -> &Surface {
         &self.surface
     }
