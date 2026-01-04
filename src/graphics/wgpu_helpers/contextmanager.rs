@@ -80,6 +80,10 @@ impl WgpuContextManager {
     pub fn surface(&self) -> &Surface {
         &self.surface
     }
+
+    pub fn format(&self) -> &TextureFormat {
+        &self.config.format
+    }
     //----------------------------------------------------------- various constructors
     pub async fn new_with_winit(
         window: Arc<winit::window::Window>,
