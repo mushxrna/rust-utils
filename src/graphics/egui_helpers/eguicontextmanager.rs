@@ -18,7 +18,14 @@ impl EguiContextManager {
     //----------------------------------------------------------- constructor
     pub fn new(window: &Arc<Window>, wgpu_ctx: &WgpuContextManager) -> Self {
         let ctx = Context::default();
-        let state = State::new(ctx, egui::ViewportId::ROOT, window, None, None, None);
+        let state = State::new(
+            ctx,
+            egui::ViewportId::ROOT,
+            window,
+            Some(window.scale_factor() as f32),
+            None,
+            None,
+        );
 
         let renderer = Renderer::new(
             wgpu_ctx.device(),
