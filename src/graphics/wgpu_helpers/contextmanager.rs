@@ -88,6 +88,10 @@ impl WgpuContextManager {
     pub fn format(&self) -> &TextureFormat {
         &self.config.format
     }
+
+    pub fn size(&self) -> (u32, u32) {
+        (self.config.width, self.config.height)
+    }
     //----------------------------------------------------------- various constructors
     pub async fn new_with_winit(
         window: Arc<winit::window::Window>,
