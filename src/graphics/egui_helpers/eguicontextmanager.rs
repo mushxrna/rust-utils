@@ -39,11 +39,11 @@ impl EguiContextManager {
         }
     }
     //----------------------------------------------------------- render pass
-    pub fn render_pass(
+    pub fn render_pass<F: FnMut(&Context)>(
         &self,
         wgpu_ctx: &WgpuContextManager,
         window: Arc<Window>,
-        f: Box<dyn FnMut(&Context)>,
+        f: F,
     ) {
         let input = self.state.borrow_mut().take_egui_input(&window);
         let full_output = self.state.borrow().egui_ctx().run(input, f);
