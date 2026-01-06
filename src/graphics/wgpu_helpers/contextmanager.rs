@@ -122,7 +122,7 @@ impl WgpuContextManager {
             surface,
         })
     }
-
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn blocking_with_winit(
         window: Arc<winit::window::Window>,
     ) -> Result<Self, WpguContextError> {
