@@ -16,8 +16,13 @@ impl EguiContextManager {
         self.renderer.borrow_mut()
     }
     //----------------------------------------------------------- constructor
-    pub fn new(window: &Arc<Window>, wgpu_ctx: &WgpuContextManager) -> Self {
+    pub fn new<F: Fn(&Context)>(
+        window: &Arc<Window>,
+        wgpu_ctx: &WgpuContextManager,
+        ctx_setup: F,
+    ) -> Self {
         let ctx = Context::default();
+        ctx_setup(&ctx);
         let state = State::new(
             ctx,
             egui::ViewportId::ROOT,
