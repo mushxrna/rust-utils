@@ -77,7 +77,13 @@ impl EguiContextManager {
             pixels_per_point: window.scale_factor() as f32,
         };
 
-        let output = wgpu_ctx.surface().get_current_texture().unwrap();
+        let output = {
+            if let Ok(x) = wgpu_ctx.surface().get_current_texture() {
+                x
+            } else {
+                return;
+            }
+        };
         let view = output.texture.create_view(&Default::default());
 
         let mut encoder = wgpu_ctx
