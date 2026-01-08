@@ -2,18 +2,18 @@ use crate::graphics::egui_helpers::common::*;
 use std::cell::{RefCell, RefMut};
 
 pub struct EguiContextManager {
-    state: State,
-    renderer: Renderer,
+    state: RefCell<State>,
+    renderer: RefCell<Renderer>,
 }
 
 impl EguiContextManager {
     //----------------------------------------------------------- accessors
-    pub fn state(&mut self) -> &mut State {
-        &mut self.state
+    pub fn state(&self) -> RefMut<State> {
+        self.state.borrow_mut()
     }
 
-    pub fn renderer(&mut self) -> &mut Renderer {
-        &mut self.renderer
+    pub fn renderer(&mut self) -> RefMut<Renderer> {
+        self.renderer.borrow_mut()
     }
     //----------------------------------------------------------- constructor
     pub fn new<F: Fn(&Context)>(
@@ -38,29 +38,38 @@ impl EguiContextManager {
             egui_wgpu::RendererOptions::default(),
         );
 
-        Self { state, renderer }
+        Self {
+            state: RefCell::new(state),
+            renderer: RefCell::new(renderer),
+        }
     }
     //----------------------------------------------------------- render pass
-    pub fn render_pass(
-        &mut self,
+    pub fn render_pass<F: FnMut(&Context)>(
+        &self,
         wgpu_ctx: &WgpuContextManager,
         window: Arc<Window>,
-        f: Box<dyn FnMut(&Context) + '_>,
+        f: F,
     ) {
-        let input = self.state.take_egui_input(&window);
-        let full_output = self.state.egui_ctx().run(input, f);
+        let input = self.state.borrow_mut().take_egui_input(&window);
+        let full_output = self.state.borrow().egui_ctx().run(input, f);
 
         self.state
+            .borrow_mut()
             .handle_platform_output(&window, full_output.platform_output);
 
         let tris = self
             .state
+            .borrow()
             .egui_ctx()
             .tessellate(full_output.shapes, full_output.pixels_per_point);
 
         for (id, image_delta) in &full_output.textures_delta.set {
-            self.renderer
-                .update_texture(wgpu_ctx.device(), wgpu_ctx.queue(), *id, image_delta);
+            self.renderer.borrow_mut().update_texture(
+                wgpu_ctx.device(),
+                wgpu_ctx.queue(),
+                *id,
+                image_delta,
+            );
         }
 
         let screen_descriptor = ScreenDescriptor {
@@ -81,7 +90,7 @@ impl EguiContextManager {
             .device()
             .create_command_encoder(&Default::default());
 
-        let new_cmd_bufs = self.renderer.update_buffers(
+        let new_cmd_bufs = self.renderer.borrow_mut().update_buffers(
             wgpu_ctx.device(),
             wgpu_ctx.queue(),
             &mut encoder,
@@ -104,7 +113,7 @@ impl EguiContextManager {
                 ..Default::default()
             });
 
-            self.renderer.render(
+            self.renderer.borrow().render(
                 &mut render_pass.forget_lifetime(),
                 &tris,
                 &screen_descriptor,
@@ -120,7 +129,7 @@ impl EguiContextManager {
         output.present();
 
         for id in &full_output.textures_delta.free {
-            self.renderer.free_texture(id);
+            self.renderer.borrow_mut().free_texture(id);
         }
     }
 }
